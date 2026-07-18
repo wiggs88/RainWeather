@@ -72,6 +72,14 @@ export function WeatherPanel({
       : snapshot.radarMode === 'history'
         ? 'RADAR HISTORY + ICON-D2'
         : 'ICON-D2 MODEL';
+  const frameLabel =
+    snapshot.radarMode === 'nowcast'
+      ? selectedHasRadar
+        ? 'RADAR FRAME'
+        : 'MODEL TIMELINE'
+      : snapshot.radarMode === 'history'
+        ? 'HISTORICAL RADAR'
+        : 'BASE MAP';
 
   return (
     <aside className="weather-panel" id="weather-panel" aria-live="polite">
@@ -95,13 +103,17 @@ export function WeatherPanel({
 
       <div className="status-controls">
         <div className="rain-status">
-          <span className={`intensity-dot intensity-${summary.currentIntensity}`} />
-          <div>
-            <span className="eyebrow">{summary.confidence.toUpperCase()} CONFIDENCE</span>
-            <h1>{summary.headline}</h1>
-            <p>
-              {windowText ? `DRY WINDOW ${windowText}` : summary.detail.toUpperCase()}
-            </p>
+          <div className="status-headline-row">
+            <span
+              className={`intensity-dot intensity-${summary.currentIntensity}`}
+              aria-hidden="true"
+            />
+            <div>
+              <h1>{summary.headline}</h1>
+              <p>
+                {windowText ? `DRY WINDOW ${windowText}` : summary.detail.toUpperCase()}
+              </p>
+            </div>
           </div>
         </div>
         <div className="playback-row">
@@ -126,6 +138,13 @@ export function WeatherPanel({
         onSelect={playback.setSelectedIndex}
         timezone={location.timezone}
       />
+
+      <div className="radar-state" aria-live="polite">
+        <span>{selected?.phase.toUpperCase() ?? 'LOADING'}</span>
+        <strong>{frameLabel}</strong>
+        <span>{sourceLabel}</span>
+        <span>{formatUpdated(snapshot.updatedAt).toUpperCase()}</span>
+      </div>
 
       <div className="panel-footer">
         <span>{selected?.thunderRisk && selected.thunderRisk >= 0.25 ? 'THUNDER RISK' : 'PRECIPITATION'}</span>

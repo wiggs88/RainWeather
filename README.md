@@ -1,6 +1,6 @@
-# RainWeather
+# HOWDRY?!
 
-A minimal, map-first rain radar for mobile and desktop browsers. RainWeather combines animated DWD radar with a local precipitation timeline to estimate when rain will start, stop, and leave a useful dry window.
+A minimal, map-first rain radar for mobile and desktop browsers. HOWDRY?! combines animated DWD radar with a local precipitation timeline to estimate when rain will start, stop, and leave a useful dry window.
 
 ## Features
 

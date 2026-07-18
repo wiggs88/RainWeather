@@ -117,20 +117,20 @@ a:focus-visible {
   position: fixed;
   z-index: 30;
   top: max(12px, env(safe-area-inset-top));
-  right: 12px;
-  left: 12px;
+  right: auto;
+  left: 50%;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) 44px;
   gap: 8px;
   align-items: center;
-  max-width: 720px;
+  width: min(680px, calc(100vw - 24px));
+  transform: translateX(-50%);
 }
 
 .brand,
 .location-search,
 .icon-button,
 .search-results,
-.map-frame-label,
 .weather-panel {
   border: 1px solid var(--border);
   background: var(--surface);
@@ -274,27 +274,6 @@ a:focus-visible {
   padding: 18px 12px;
 }
 
-.map-frame-label {
-  position: fixed;
-  z-index: 20;
-  top: 68px;
-  right: 12px;
-  display: flex;
-  min-height: 36px;
-  align-items: center;
-  gap: 9px;
-  padding: 0 10px;
-  border-radius: 7px;
-  color: var(--muted);
-  font-size: 10px;
-  letter-spacing: 0.06em;
-}
-
-.map-frame-label strong {
-  color: var(--text);
-  font-weight: 500;
-}
-
 .weather-panel {
   position: fixed;
   z-index: 25;
@@ -368,18 +347,27 @@ a:focus-visible {
 }
 
 .rain-status {
-  display: grid;
-  grid-template-columns: 8px minmax(0, 1fr);
-  gap: 12px;
-  align-items: start;
   padding: 10px 0 8px;
 }
 
+.status-headline-row {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 5px minmax(0, 1fr);
+  gap: 8px;
+  align-items: stretch;
+}
+
 .intensity-dot {
-  width: 8px;
-  height: 44px;
+  width: 5px;
+  min-height: 30px;
+  margin: 0;
   border-radius: 2px;
   background: var(--faint);
+}
+
+.status-headline-row h1 {
+  margin-top: 0;
 }
 
 .rain-status h1,
@@ -565,6 +553,29 @@ a:focus-visible {
   font-size: 8px;
 }
 
+.radar-state {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 7px;
+  margin-top: 5px;
+  color: var(--faint);
+  font-size: 7px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.radar-state strong {
+  color: var(--muted);
+  font-weight: 550;
+}
+
+.radar-state span:nth-last-child(2) {
+  overflow: hidden;
+  margin-left: auto;
+  text-overflow: ellipsis;
+}
+
 .panel-footer {
   display: flex;
   justify-content: space-between;
@@ -618,37 +629,107 @@ a:focus-visible {
   }
 
   .weather-panel {
-    width: 388px;
+    width: min(680px, calc(100vw - 24px));
     min-height: 0;
-    top: 12px;
-    right: 12px;
+    top: auto;
+    right: auto;
     bottom: 12px;
-    left: auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 20px;
+    left: 50%;
+    display: block;
+    padding: 10px 12px;
+    transform: translateX(-50%);
+  }
+
+  .panel-heading,
+  .panel-footer {
+    display: none;
+  }
+
+  .status-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: end;
+  }
+
+  .rain-status {
+    min-width: 0;
+    padding: 0;
+  }
+
+  .rain-status h1 {
+    margin-top: 2px;
+    font-size: 22px;
+  }
+
+  .rain-status p {
+    overflow: hidden;
+    margin-top: 2px;
+    font-size: 9px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rain-status .eyebrow {
+    font-size: 8px;
+  }
+
+  .playback-row {
+    margin: 0;
+  }
+
+  .playback-button,
+  .now-button {
+    border-color: transparent;
+    background: transparent;
+    color: var(--text);
+  }
+
+  .now-button {
+    padding: 0 8px;
+  }
+
+  .timeline {
+    margin-top: 5px;
   }
 
   .timeline-chart {
-    height: 70px;
-    margin-top: 8px;
+    height: 42px;
+    margin-top: 4px;
   }
 
-  .location-shell {
-    right: 416px;
+  .timeline-bars {
+    inset: 13px 0 0;
   }
 
-  .map-frame-label {
-    top: auto;
-    right: 416px;
-    bottom: 12px;
+  .timeline-bar {
+    max-height: 29px;
   }
 
-  .rain-status h1,
-  .loading-panel h1 {
-    font-size: 32px;
+  .now-marker {
+    top: 8px;
   }
+
+  .now-marker::before {
+    top: -8px;
+  }
+
+  .selected-marker {
+    top: 10px;
+  }
+
+  .selected-marker::after {
+    top: 0;
+  }
+
+  .attribution {
+    overflow: hidden;
+    margin-top: 4px;
+    font-size: 6px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
 }
 
 @media (max-width: 719px) {
@@ -670,14 +751,7 @@ a:focus-visible {
 
   .rain-status {
     min-width: 0;
-    grid-template-columns: 5px minmax(0, 1fr);
-    gap: 8px;
     padding: 0;
-  }
-
-  .intensity-dot {
-    width: 5px;
-    height: 34px;
   }
 
   .rain-status h1 {
@@ -750,7 +824,7 @@ a:focus-visible {
 
 @media (min-width: 1100px) {
   .location-shell {
-    max-width: 760px;
+    width: min(680px, calc(100vw - 24px));
   }
 }
 

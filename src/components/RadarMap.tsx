@@ -36,7 +36,7 @@ const markerStyle = new Style({
   }),
 });
 
-const MOBILE_PANEL_RESERVED_HEIGHT = 190;
+const PANEL_RESERVED_HEIGHT = 190;
 
 function closestRainViewerFrame(
   frames: RainViewerFrame[],
@@ -99,15 +99,11 @@ export function RadarMap({
       const size = map.getSize();
       if (!size) return;
       const currentLocation = locationRef.current;
-      const availableWidth = size[0] >= 720 ? size[0] - 400 : size[0];
-      const targetY =
-        size[0] >= 720
-          ? size[1] / 2
-          : Math.max(160, (size[1] - MOBILE_PANEL_RESERVED_HEIGHT) / 2 + 48);
+      const targetY = Math.max(160, (size[1] - PANEL_RESERVED_HEIGHT) / 2 + 48);
       map.getView().centerOn(
         fromLonLat([currentLocation.longitude, currentLocation.latitude]),
         size,
-        [availableWidth / 2, targetY],
+        [size[0] / 2, targetY],
       );
     };
     const observer = new ResizeObserver(() => {
@@ -133,12 +129,8 @@ export function RadarMap({
     map.getView().setZoom(8.6);
     const size = map.getSize();
     if (size) {
-      const availableWidth = size[0] >= 720 ? size[0] - 400 : size[0];
-      const targetY =
-        size[0] >= 720
-          ? size[1] / 2
-          : Math.max(160, (size[1] - MOBILE_PANEL_RESERVED_HEIGHT) / 2 + 48);
-      map.getView().centerOn(coordinate, size, [availableWidth / 2, targetY]);
+      const targetY = Math.max(160, (size[1] - PANEL_RESERVED_HEIGHT) / 2 + 48);
+      map.getView().centerOn(coordinate, size, [size[0] / 2, targetY]);
     }
   }, [location]);
 

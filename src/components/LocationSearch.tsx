@@ -71,9 +71,9 @@ export function LocationSearch({ location, onSelect }: LocationSearchProps) {
 
   return (
     <header className="location-shell">
-      <div className="brand" aria-label="RainWeather">
+      <div className="brand" aria-label="HOWDRY?!">
         <span className="brand-mark" aria-hidden="true" />
-        <span>RAINWEATHER</span>
+        <span>HOWDRY?!</span>
       </div>
       <form className="location-search" onSubmit={handleSubmit} role="search">
         <label className="sr-only" htmlFor="location-query">
