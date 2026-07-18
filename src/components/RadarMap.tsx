@@ -98,7 +98,7 @@ export function RadarMap({
       if (!size) return;
       const currentLocation = locationRef.current;
       const availableWidth = size[0] >= 720 ? size[0] - 400 : size[0];
-      const targetY = size[0] >= 720 ? size[1] / 2 : Math.max(160, (size[1] - 340) / 2 + 48);
+      const targetY = size[0] >= 720 ? size[1] / 2 : Math.max(160, (size[1] - 250) / 2 + 48);
       map.getView().centerOn(
         fromLonLat([currentLocation.longitude, currentLocation.latitude]),
         size,
@@ -129,7 +129,7 @@ export function RadarMap({
     const size = map.getSize();
     if (size) {
       const availableWidth = size[0] >= 720 ? size[0] - 400 : size[0];
-      const targetY = size[0] >= 720 ? size[1] / 2 : Math.max(160, (size[1] - 340) / 2 + 48);
+      const targetY = size[0] >= 720 ? size[1] / 2 : Math.max(160, (size[1] - 250) / 2 + 48);
       map.getView().centerOn(coordinate, size, [availableWidth / 2, targetY]);
     }
   }, [location]);
