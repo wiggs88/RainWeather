@@ -174,7 +174,7 @@ a:focus-visible {
   padding: 0 10px;
   background: transparent;
   color: var(--text);
-  font-size: 13px;
+  font-size: 16px;
 }
 
 .location-search input::placeholder {
@@ -398,6 +398,10 @@ a:focus-visible {
   margin-bottom: 6px;
 }
 
+.status-controls {
+  display: block;
+}
+
 .playback-button {
   border-color: var(--text);
   background: var(--text);
@@ -609,6 +613,10 @@ a:focus-visible {
     left: 146px;
   }
 
+  .location-search input {
+    font-size: 13px;
+  }
+
   .weather-panel {
     width: 388px;
     min-height: 0;
@@ -644,6 +652,56 @@ a:focus-visible {
 }
 
 @media (max-width: 719px) {
+  .weather-panel {
+    padding: 10px 12px;
+  }
+
+  .panel-heading,
+  .panel-footer {
+    display: none;
+  }
+
+  .status-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: end;
+  }
+
+  .rain-status {
+    min-width: 0;
+    grid-template-columns: 5px minmax(0, 1fr);
+    gap: 8px;
+    padding: 0;
+  }
+
+  .intensity-dot {
+    width: 5px;
+    height: 34px;
+  }
+
+  .rain-status h1 {
+    margin-top: 2px;
+    font-size: clamp(18px, 5.5vw, 22px);
+  }
+
+  .rain-status p {
+    overflow: hidden;
+    margin-top: 2px;
+    font-size: 9px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rain-status .eyebrow {
+    font-size: 8px;
+  }
+
+  .playback-row {
+    gap: 8px;
+    margin: 0;
+  }
+
   .playback-button,
   .now-button {
     border-color: transparent;
@@ -654,6 +712,40 @@ a:focus-visible {
   .now-button {
     padding: 0 8px;
   }
+
+  .timeline {
+    margin-top: 5px;
+  }
+
+  .timeline-meta,
+  .timeline-times {
+    font-size: 9px;
+  }
+
+  .timeline-meta strong {
+    font-size: 11px;
+  }
+
+  .timeline-chart {
+    height: 42px;
+    margin-top: 4px;
+  }
+
+  .timeline-bar {
+    max-height: 30px;
+  }
+
+  .timeline-hint {
+    font-size: 7px;
+  }
+
+  .attribution {
+    overflow: hidden;
+    margin-top: 4px;
+    font-size: 6px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 @media (min-width: 1100px) {
@@ -663,37 +755,20 @@ a:focus-visible {
 }
 
 @media (max-height: 700px) and (max-width: 719px) {
-  .weather-panel {
-    padding: 10px 12px;
-  }
-
-  .panel-heading,
-  .panel-footer,
   .attribution {
     display: none;
   }
 
-  .rain-status {
-    padding: 0 0 6px;
-  }
-
   .rain-status h1 {
-    font-size: 26px;
-  }
-
-  .rain-status p {
-    overflow: hidden;
-    font-size: 9px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .intensity-dot {
-    height: 36px;
+    font-size: 20px;
   }
 
   .timeline-chart {
-    height: 50px;
+    height: 38px;
+  }
+
+  .timeline-bar {
+    max-height: 26px;
   }
 }
 
