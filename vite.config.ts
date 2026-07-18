@@ -12,8 +12,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['rainweather.svg'],
       manifest: {
-        name: 'RainWeather',
-        short_name: 'RainWeather',
+        name: 'HOWDRY?!',
+        short_name: 'HOWDRY?!',
         description: 'Animated rain radar and local dry-window forecast.',
         theme_color: '#090b0d',
         background_color: '#090b0d',

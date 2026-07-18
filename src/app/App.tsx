@@ -58,18 +58,6 @@ export function App() {
             rainViewerFrames={activeSnapshot?.rainViewerFrames ?? []}
           />
         </Suspense>
-        <div className="map-frame-label" aria-live="polite">
-          <span>{playback.selectedPoint?.phase.toUpperCase() ?? 'LOADING'}</span>
-          <strong>
-            {activeSnapshot?.radarMode === 'nowcast'
-              ? playback.selectedPoint?.mapFrameId
-                ? 'RADAR FRAME'
-                : 'MODEL TIMELINE'
-              : activeSnapshot?.radarMode === 'history'
-                ? 'HISTORICAL RADAR'
-                : 'BASE MAP'}
-          </strong>
-        </div>
       </main>
       <WeatherPanel
         status={weather.status}
