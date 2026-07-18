@@ -21,7 +21,7 @@ export default defineConfig({
         orientation: 'any',
         icons: [
           {
-            src: '/rainweather.svg',
+            src: 'rainweather.svg',
             sizes: 'any',
             type: 'image/svg+xml',
             purpose: 'any maskable',
