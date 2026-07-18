@@ -429,10 +429,6 @@ a:focus-visible {
   background: var(--surface-raised);
 }
 
-.refresh-button {
-  margin-left: auto;
-}
-
 .timeline {
   width: 100%;
 }
