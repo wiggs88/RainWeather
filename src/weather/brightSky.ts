@@ -1,6 +1,7 @@
 import type { Location, WeatherAlert } from './types';
 
 const BRIGHT_SKY_URL = 'https://api.brightsky.dev';
+const RADAR_DISTANCE_METERS = 200_000;
 
 export interface BrightSkyRadarRecord {
   timestamp: string;
@@ -44,7 +45,7 @@ export async function fetchBrightSkyRadar(
   url.search = new URLSearchParams({
     lat: location.latitude.toString(),
     lon: location.longitude.toString(),
-    distance: '120000',
+    distance: RADAR_DISTANCE_METERS.toString(),
     date: new Date(nowMs - 60 * 60_000).toISOString(),
     last_date: new Date(nowMs + 2 * 60 * 60_000).toISOString(),
     format: 'compressed',
