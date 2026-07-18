@@ -93,30 +93,31 @@ export function WeatherPanel({
         </div>
       ) : null}
 
-      <div className="rain-status">
-        <span className={`intensity-dot intensity-${summary.currentIntensity}`} />
-        <div>
-          <span className="eyebrow">{summary.confidence.toUpperCase()} CONFIDENCE</span>
-          <h1>{summary.headline}</h1>
-          <p>
-            {windowText ? `DRY WINDOW ${windowText}` : summary.detail.toUpperCase()}
-          </p>
+      <div className="status-controls">
+        <div className="rain-status">
+          <span className={`intensity-dot intensity-${summary.currentIntensity}`} />
+          <div>
+            <span className="eyebrow">{summary.confidence.toUpperCase()} CONFIDENCE</span>
+            <h1>{summary.headline}</h1>
+            <p>
+              {windowText ? `DRY WINDOW ${windowText}` : summary.detail.toUpperCase()}
+            </p>
+          </div>
         </div>
-      </div>
-
-      <div className="playback-row">
-        <button
-          className="icon-button playback-button"
-          type="button"
-          onClick={playback.togglePlayback}
-          aria-label={playback.isPlaying ? 'Pause radar animation' : 'Play radar animation'}
-        >
-          {playback.isPlaying ? <PauseIcon /> : <PlayIcon />}
-        </button>
-        <button className="text-button now-button" type="button" onClick={playback.jumpToNow}>
-          <CrosshairIcon />
-          NOW
-        </button>
+        <div className="playback-row">
+          <button
+            className="icon-button playback-button"
+            type="button"
+            onClick={playback.togglePlayback}
+            aria-label={playback.isPlaying ? 'Pause radar animation' : 'Play radar animation'}
+          >
+            {playback.isPlaying ? <PauseIcon /> : <PlayIcon />}
+          </button>
+          <button className="text-button now-button" type="button" onClick={playback.jumpToNow}>
+            <CrosshairIcon />
+            NOW
+          </button>
+        </div>
       </div>
 
       <Timeline
