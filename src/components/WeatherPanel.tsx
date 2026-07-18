@@ -3,7 +3,7 @@ import type {
   WeatherLoadStatus,
   WeatherSnapshot,
 } from '../weather/types';
-import { CrosshairIcon, PauseIcon, PlayIcon, RefreshIcon } from './Icons';
+import { CrosshairIcon, PauseIcon, PlayIcon } from './Icons';
 import { Timeline } from './Timeline';
 
 interface WeatherPanelProps {
@@ -116,15 +116,6 @@ export function WeatherPanel({
         <button className="text-button now-button" type="button" onClick={playback.jumpToNow}>
           <CrosshairIcon />
           NOW
-        </button>
-        <button
-          className="icon-button refresh-button"
-          type="button"
-          onClick={onRefresh}
-          aria-label="Refresh weather data"
-          disabled={status === 'loading'}
-        >
-          <RefreshIcon />
         </button>
       </div>
 
