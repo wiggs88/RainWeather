@@ -94,7 +94,6 @@ export async function decodeBrightSkyRadar(
         return;
       }
       if (message.type === 'frame-error') {
-        console.warn(`Radar frame ${message.index} failed: ${message.message}`);
         return;
       }
       if (message.type !== 'done') return;

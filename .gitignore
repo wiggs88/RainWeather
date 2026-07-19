@@ -4,3 +4,7 @@ dist/
 *.local
 coverage/
 *.tsbuildinfo
+
+# Local planning and generated design notes are not part of the public app.
+docs/plans/
+design-system/

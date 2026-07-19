@@ -5,8 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#090b0d" />
     <meta name="color-scheme" content="dark" />
+    <meta name="referrer" content="no-referrer" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; base-uri 'self'; connect-src 'self' https://api.brightsky.dev https://api.open-meteo.com https://geocoding-api.open-meteo.com https://api.rainviewer.com https://*.rainviewer.com https://tiles.openfreemap.org; font-src 'self'; form-action 'self'; img-src 'self' data: blob: https://*.rainviewer.com https://tiles.openfreemap.org; manifest-src 'self'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:"
+    />
     <meta name="description" content="Animated rain radar and local dry-window forecast." />
-    <link rel="icon" href="/rainweather.svg" type="image/svg+xml" />
+    <link rel="icon" href="%BASE_URL%rainweather.svg" type="image/svg+xml" />
     <title>HOWDRY?!</title>
   </head>
   <body>

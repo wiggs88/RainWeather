@@ -1,4 +1,4 @@
-name: Deploy RainWeather to GitHub Pages
+name: Deploy HOWDRY?!
 
 on:
   push:
