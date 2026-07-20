@@ -353,9 +353,13 @@ a:focus-visible {
 .status-headline-row {
   display: grid;
   min-width: 0;
-  grid-template-columns: 5px minmax(0, 1fr);
+  grid-template-columns: auto 5px minmax(0, 1fr);
   gap: 8px;
   align-items: stretch;
+}
+
+.status-copy {
+  min-width: 0;
 }
 
 .intensity-dot {
@@ -388,11 +392,12 @@ a:focus-visible {
 
 .temperature-gauge {
   display: grid;
-  height: 44px;
-  grid-template-columns: 6px 30px;
-  gap: 7px;
+  height: 32px;
+  grid-template-columns: 6px 26px;
+  gap: 5px;
   align-items: center;
-  padding: 5px 0;
+  align-self: center;
+  padding: 2px 0;
   color: var(--muted);
 }
 
@@ -438,7 +443,7 @@ a:focus-visible {
 
 .temperature-value {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   font-weight: 500;
   letter-spacing: -0.04em;
@@ -820,6 +825,15 @@ a:focus-visible {
   .rain-status {
     min-width: 0;
     padding: 0;
+  }
+
+  .status-headline-row {
+    gap: 6px;
+  }
+
+  .temperature-gauge {
+    grid-template-columns: 6px 23px;
+    gap: 4px;
   }
 
   .rain-status h1 {
