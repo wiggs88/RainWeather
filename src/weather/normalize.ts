@@ -17,11 +17,27 @@ export function mergeTimeline(
   }
 
   const sortedRadar = [...radarPoints].sort((a, b) => a.epochMs - b.epochMs);
+  const forecastWithTemperature = forecastPoints.filter(
+    (point) =>
+      typeof point.temperatureC === 'number' && Number.isFinite(point.temperatureC),
+  );
+  const enrichedRadar = sortedRadar.map((radarPoint) => {
+    let nearest: TimelinePoint | undefined;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+    forecastWithTemperature.forEach((forecastPoint) => {
+      const distance = Math.abs(forecastPoint.epochMs - radarPoint.epochMs);
+      if (distance < nearestDistance) {
+        nearest = forecastPoint;
+        nearestDistance = distance;
+      }
+    });
+    return nearest ? { ...radarPoint, temperatureC: nearest.temperatureC } : radarPoint;
+  });
   const firstRadar = sortedRadar[0].epochMs;
   const lastRadar = sortedRadar.at(-1)!.epochMs;
   const merged = [
     ...forecastPoints.filter((point) => point.epochMs < firstRadar),
-    ...sortedRadar,
+    ...enrichedRadar,
     ...forecastPoints.filter((point) => point.epochMs > lastRadar),
   ].sort((a, b) => a.epochMs - b.epochMs);
 

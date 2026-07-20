@@ -386,6 +386,74 @@ a:focus-visible {
   margin-bottom: 6px;
 }
 
+.temperature-gauge {
+  display: grid;
+  height: 44px;
+  grid-template-columns: 6px 30px;
+  gap: 7px;
+  align-items: center;
+  padding: 5px 0;
+  color: var(--muted);
+}
+
+.temperature-track {
+  position: relative;
+  width: 2px;
+  height: 28px;
+  justify-self: end;
+  border-radius: 2px;
+  background: var(--border);
+}
+
+.temperature-track::before,
+.temperature-track::after {
+  position: absolute;
+  left: -2px;
+  width: 6px;
+  height: 1px;
+  background: var(--faint);
+  content: '';
+}
+
+.temperature-track::before {
+  top: 0;
+}
+
+.temperature-track::after {
+  bottom: 0;
+}
+
+.temperature-marker {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 6px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--light-rain);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--light-rain) 45%, transparent);
+  transform: translate(-50%, calc(50% - var(--temperature-offset)));
+  transition: transform 180ms ease-out;
+}
+
+.temperature-value {
+  color: var(--muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+
+.temperature-gauge.is-unavailable .temperature-marker {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .temperature-marker {
+    transition: none;
+  }
+}
+
 .status-controls {
   display: block;
 }

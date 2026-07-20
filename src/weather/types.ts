@@ -21,6 +21,7 @@ export interface TimelinePoint {
   source: WeatherSource;
   precipitationRate: number;
   precipitationAmount: number;
+  temperatureC?: number;
   intensity: Intensity;
   thunderRisk: number;
   mapFrameId?: string;

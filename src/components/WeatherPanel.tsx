@@ -4,6 +4,7 @@ import type {
   WeatherSnapshot,
 } from '../weather/types';
 import { CrosshairIcon, PauseIcon, PlayIcon } from './Icons';
+import { TemperatureGauge } from './TemperatureGauge';
 import { Timeline } from './Timeline';
 
 interface WeatherPanelProps {
@@ -117,6 +118,11 @@ export function WeatherPanel({
           </div>
         </div>
         <div className="playback-row">
+          <TemperatureGauge
+            temperatureC={selected?.temperatureC}
+            epochMs={selected?.epochMs}
+            timezone={location.timezone}
+          />
           <button
             className="icon-button playback-button"
             type="button"

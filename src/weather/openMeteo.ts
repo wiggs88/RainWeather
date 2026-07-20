@@ -36,6 +36,7 @@ interface DwdForecastResponse {
     rain?: number[];
     showers?: number[];
     lightning_potential?: number[];
+    temperature_2m?: Array<number | null>;
   };
 }
 
@@ -87,7 +88,7 @@ export async function fetchDwdForecast(
   url.search = new URLSearchParams({
     latitude: location.latitude.toString(),
     longitude: location.longitude.toString(),
-    minutely_15: 'precipitation,rain,showers,lightning_potential',
+    minutely_15: 'precipitation,rain,showers,lightning_potential,temperature_2m',
     past_minutely_15: '8',
     forecast_minutely_15: '40',
     timezone: 'auto',
@@ -98,6 +99,7 @@ export async function fetchDwdForecast(
   const times = series?.time ?? [];
   const precipitation = series?.precipitation ?? [];
   const lightning = series?.lightning_potential ?? [];
+  const temperatures = series?.temperature_2m ?? [];
 
   if (times.length === 0) {
     throw new Error('DWD forecast returned no timeline');
@@ -108,6 +110,7 @@ export async function fetchDwdForecast(
     const amount = Math.max(0, precipitation[index] ?? 0);
     const precipitationRate = amount * 4;
     const lightningPotential = Math.max(0, lightning[index] ?? 0);
+    const temperatureC = temperatures[index];
 
     return {
       id: `icon-${epochMs}`,
@@ -118,6 +121,9 @@ export async function fetchDwdForecast(
       source: 'icon-d2',
       precipitationRate,
       precipitationAmount: amount,
+      ...(typeof temperatureC === 'number' && Number.isFinite(temperatureC)
+        ? { temperatureC }
+        : {}),
       intensity: classifyPrecipitation(precipitationRate),
       thunderRisk: Math.min(1, lightningPotential / 5),
     };

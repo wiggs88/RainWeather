@@ -5,7 +5,7 @@ import type { TimelinePoint } from './types';
 
 const NOW = Date.parse('2026-07-18T18:00:00Z');
 
-function forecast(minutes: number): TimelinePoint {
+function forecast(minutes: number, temperatureC = 18): TimelinePoint {
   const epochMs = NOW + minutes * 60_000;
   return {
     id: `forecast-${minutes}`,
@@ -16,6 +16,7 @@ function forecast(minutes: number): TimelinePoint {
     source: 'icon-d2',
     precipitationRate: 1,
     precipitationAmount: 0.25,
+    temperatureC,
     intensity: classifyPrecipitation(1),
     thunderRisk: 0,
   };
@@ -31,7 +32,11 @@ describe('mergeTimeline', () => {
         NOW,
       ),
     );
-    const merged = mergeTimeline(radar, [-15, 0, 15, 30].map(forecast), NOW);
+    const merged = mergeTimeline(
+      radar,
+      [-15, 0, 15, 30].map((minutes) => forecast(minutes)),
+      NOW,
+    );
 
     expect(merged.map((point) => point.id)).toEqual([
       'forecast--15',
@@ -42,6 +47,27 @@ describe('mergeTimeline', () => {
       'forecast-30',
     ]);
     expect(merged.find((point) => point.phase === 'now')?.id).toBe('radar-0');
+    expect(merged.find((point) => point.id === 'radar--5')?.temperatureC).toBe(18);
+    expect(merged.find((point) => point.id === 'radar-5')?.temperatureC).toBe(18);
+  });
+
+  it('copies the nearest forecast temperature onto radar points', () => {
+    const radar = [4, 11].map((minutes) =>
+      radarSampleToTimelinePoint(
+        `radar-${minutes}`,
+        new Date(NOW + minutes * 60_000).toISOString(),
+        2,
+        NOW,
+      ),
+    );
+    const merged = mergeTimeline(
+      radar,
+      [forecast(0, 12), forecast(15, 17)],
+      NOW,
+    );
+
+    expect(merged.find((point) => point.id === 'radar-4')?.temperatureC).toBe(12);
+    expect(merged.find((point) => point.id === 'radar-11')?.temperatureC).toBe(17);
   });
 
   it('returns forecast-only data when radar is unavailable', () => {
