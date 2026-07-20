@@ -105,11 +105,16 @@ export function WeatherPanel({
       <div className="status-controls">
         <div className="rain-status">
           <div className="status-headline-row">
+            <TemperatureGauge
+              temperatureC={selected?.temperatureC}
+              epochMs={selected?.epochMs}
+              timezone={location.timezone}
+            />
             <span
               className={`intensity-dot intensity-${summary.currentIntensity}`}
               aria-hidden="true"
             />
-            <div>
+            <div className="status-copy">
               <h1>{summary.headline}</h1>
               <p>
                 {windowText ? `DRY WINDOW ${windowText}` : summary.detail.toUpperCase()}
@@ -118,11 +123,6 @@ export function WeatherPanel({
           </div>
         </div>
         <div className="playback-row">
-          <TemperatureGauge
-            temperatureC={selected?.temperatureC}
-            epochMs={selected?.epochMs}
-            timezone={location.timezone}
-          />
           <button
             className="icon-button playback-button"
             type="button"
