@@ -163,7 +163,12 @@ export function RadarMap({
       : rainViewerFrames.at(-1);
     if (fallback) {
       fallbackLayerRef.current.setSource(
-        new XYZ({ url: fallback.tileTemplate, maxZoom: 7, crossOrigin: 'anonymous' }),
+        new XYZ({
+          url: fallback.tileTemplate,
+          maxZoom: 7,
+          crossOrigin: 'anonymous',
+          interpolate: false,
+        }),
       );
       fallbackLayerRef.current.setVisible(true);
     } else {
