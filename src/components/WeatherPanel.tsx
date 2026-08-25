@@ -65,21 +65,27 @@ export function WeatherPanel({
       : undefined;
   const selected = playback.selectedPoint;
   const selectedHasRadar = Boolean(selected?.mapFrameId);
+  const selectedHasRainViewer =
+    snapshot.radarMode === 'history' && selected?.phase !== 'forecast';
   const sourceLabel =
     snapshot.radarMode === 'nowcast'
       ? selectedHasRadar
         ? 'DWD RADAR / 5 MIN'
-        : 'ICON-D2 MODEL'
+        : 'OPEN-METEO MODEL'
       : snapshot.radarMode === 'history'
-        ? 'RADAR HISTORY + ICON-D2'
-        : 'ICON-D2 MODEL';
+        ? selectedHasRainViewer
+          ? 'RAINVIEWER RADAR'
+          : 'OPEN-METEO MODEL'
+        : 'OPEN-METEO MODEL';
   const frameLabel =
     snapshot.radarMode === 'nowcast'
       ? selectedHasRadar
         ? 'RADAR FRAME'
         : 'MODEL TIMELINE'
       : snapshot.radarMode === 'history'
-        ? 'HISTORICAL RADAR'
+        ? selectedHasRainViewer
+          ? 'HISTORICAL RADAR'
+          : 'MODEL TIMELINE'
         : 'BASE MAP';
 
   return (

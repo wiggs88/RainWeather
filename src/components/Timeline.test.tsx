@@ -13,7 +13,7 @@ function point(index: number): TimelinePoint {
     epochMs,
     intervalMinutes: 15,
     phase: index === 1 ? 'now' : index < 1 ? 'observed' : 'forecast',
-    source: 'icon-d2',
+    source: 'open-meteo',
     precipitationRate: index,
     precipitationAmount: index / 4,
     intensity: index > 2 ? 'light' : 'dry',

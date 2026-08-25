@@ -13,7 +13,7 @@ function point(index: number, mapFrame = false): TimelinePoint {
     epochMs,
     intervalMinutes: 5,
     phase: index === 2 ? 'now' : index < 2 ? 'observed' : 'forecast',
-    source: mapFrame ? 'bright-sky' : 'icon-d2',
+    source: mapFrame ? 'bright-sky' : 'open-meteo',
     precipitationRate: 0,
     precipitationAmount: 0,
     intensity: 'dry',
