@@ -1,5 +1,7 @@
 import {
+  useEffect,
   useRef,
+  useState,
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
@@ -14,6 +16,20 @@ interface TimelineProps {
 }
 
 const timeFormatterCache = new Map<string, Intl.DateTimeFormat>();
+
+interface ScrubGeometry {
+  pointerId: number;
+  left: number;
+  width: number;
+  startEpochMs: number;
+  durationMs: number;
+  epochs: number[];
+}
+
+interface ScrubTarget {
+  index: number;
+  position: number;
+}
 
 function formatTime(epochMs: number, timezone?: string): string {
   const key = timezone || 'local';
@@ -31,56 +47,130 @@ function formatTime(epochMs: number, timezone?: string): string {
 }
 
 export function Timeline({ points, selectedIndex, onSelect, timezone }: TimelineProps) {
-  const isScrubbing = useRef(false);
+  const [scrubPosition, setScrubPosition] = useState<number>();
+  const scrubGeometry = useRef<ScrubGeometry | undefined>(undefined);
+  const pendingScrub = useRef<ScrubTarget | undefined>(undefined);
+  const animationFrame = useRef<number | undefined>(undefined);
   const lastScrubbedIndex = useRef<number | undefined>(undefined);
+  const lastGestureIndex = useRef<number | undefined>(undefined);
+
+  useEffect(
+    () => () => {
+      if (animationFrame.current !== undefined) {
+        window.cancelAnimationFrame(animationFrame.current);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (
+      !scrubGeometry.current &&
+      lastGestureIndex.current !== undefined &&
+      selectedIndex !== lastGestureIndex.current
+    ) {
+      lastGestureIndex.current = undefined;
+      setScrubPosition(undefined);
+    }
+  }, [selectedIndex]);
+
+  useEffect(() => {
+    if (!scrubGeometry.current) {
+      lastGestureIndex.current = undefined;
+      setScrubPosition(undefined);
+    }
+  }, [points]);
+
   if (points.length === 0) return <div className="timeline-empty" />;
   const nowIndex = Math.max(0, points.findIndex((point) => point.phase === 'now'));
   const selected = points[selectedIndex] ?? points[0];
-  const totalMinutes = points.reduce((sum, point) => sum + point.intervalMinutes, 0);
   const startEpochMs = points[0].epochMs;
   const endEpochMs = points.at(-1)!.epochMs;
   const durationMs = Math.max(1, endEpochMs - startEpochMs);
   const selectedPosition = ((selected.epochMs - startEpochMs) / durationMs) * 100;
   const nowPosition = ((points[nowIndex].epochMs - startEpochMs) / durationMs) * 100;
 
-  const indexAtPointer = (event: ReactPointerEvent<HTMLDivElement>): number | undefined => {
-    const bounds = event.currentTarget.getBoundingClientRect();
-    if (bounds.width <= 0) return undefined;
-    const ratio = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width));
-    const targetEpochMs = startEpochMs + ratio * durationMs;
+  const targetAtClientX = (
+    clientX: number,
+    geometry: ScrubGeometry,
+  ): ScrubTarget | undefined => {
+    if (geometry.width <= 0) return undefined;
+    const ratio = Math.max(0, Math.min(1, (clientX - geometry.left) / geometry.width));
+    const targetEpochMs = geometry.startEpochMs + ratio * geometry.durationMs;
     let nearestIndex = 0;
     let nearestDistance = Number.POSITIVE_INFINITY;
-    points.forEach((point, index) => {
-      const distance = Math.abs(point.epochMs - targetEpochMs);
+    geometry.epochs.forEach((epochMs, index) => {
+      const distance = Math.abs(epochMs - targetEpochMs);
       if (distance < nearestDistance) {
         nearestIndex = index;
         nearestDistance = distance;
       }
     });
-    return nearestIndex;
+    return { index: nearestIndex, position: ratio * 100 };
+  };
+
+  const commitScrub = (target: ScrubTarget) => {
+    setScrubPosition(target.position);
+    lastGestureIndex.current = target.index;
+    if (target.index === lastScrubbedIndex.current) return;
+    lastScrubbedIndex.current = target.index;
+    onSelect(target.index);
+  };
+
+  const flushPendingScrub = () => {
+    animationFrame.current = undefined;
+    const target = pendingScrub.current;
+    pendingScrub.current = undefined;
+    if (target) commitScrub(target);
   };
 
   const startScrubbing = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
-    const nextIndex = indexAtPointer(event);
-    if (nextIndex === undefined) return;
-    isScrubbing.current = true;
-    lastScrubbedIndex.current = nextIndex;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const geometry: ScrubGeometry = {
+      pointerId: event.pointerId,
+      left: bounds.left,
+      width: bounds.width,
+      startEpochMs,
+      durationMs,
+      epochs: points.map((point) => point.epochMs),
+    };
+    const target = targetAtClientX(event.clientX, geometry);
+    if (!target) return;
+    scrubGeometry.current = geometry;
+    lastScrubbedIndex.current = undefined;
     event.currentTarget.focus();
     event.currentTarget.setPointerCapture?.(event.pointerId);
-    onSelect(nextIndex);
+    commitScrub(target);
   };
 
   const continueScrubbing = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!isScrubbing.current) return;
-    const nextIndex = indexAtPointer(event);
-    if (nextIndex === undefined || nextIndex === lastScrubbedIndex.current) return;
-    lastScrubbedIndex.current = nextIndex;
-    onSelect(nextIndex);
+    const geometry = scrubGeometry.current;
+    if (!geometry || event.pointerId !== geometry.pointerId) return;
+    const target = targetAtClientX(event.clientX, geometry);
+    if (!target) return;
+    pendingScrub.current = target;
+    if (animationFrame.current === undefined) {
+      animationFrame.current = window.requestAnimationFrame(flushPendingScrub);
+    }
   };
 
-  const stopScrubbing = (event: ReactPointerEvent<HTMLDivElement>) => {
-    isScrubbing.current = false;
+  const stopScrubbing = (
+    event: ReactPointerEvent<HTMLDivElement>,
+    commitFinalPosition: boolean,
+  ) => {
+    const geometry = scrubGeometry.current;
+    if (!geometry || event.pointerId !== geometry.pointerId) return;
+    if (animationFrame.current !== undefined) {
+      window.cancelAnimationFrame(animationFrame.current);
+      animationFrame.current = undefined;
+    }
+    pendingScrub.current = undefined;
+    if (commitFinalPosition) {
+      const target = targetAtClientX(event.clientX, geometry);
+      if (target) commitScrub(target);
+    }
+    scrubGeometry.current = undefined;
     lastScrubbedIndex.current = undefined;
     if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
@@ -100,6 +190,8 @@ export function Timeline({ points, selectedIndex, onSelect, timezone }: Timeline
     }
     if (nextIndex === undefined) return;
     event.preventDefault();
+    lastGestureIndex.current = undefined;
+    setScrubPosition(undefined);
     onSelect(Math.max(0, Math.min(points.length - 1, nextIndex)));
   };
 
@@ -112,11 +204,17 @@ export function Timeline({ points, selectedIndex, onSelect, timezone }: Timeline
       </div>
       <div className="timeline-chart">
         <div className="timeline-bars" aria-hidden="true">
-          {points.map((point) => {
+          {points.map((point, index) => {
             const height = Math.max(4, Math.min(48, 4 + point.precipitationRate * 5.5));
+            const left = ((point.epochMs - startEpochMs) / durationMs) * 100;
+            const nextPoint = points[index + 1];
+            const nextLeft = nextPoint
+              ? ((nextPoint.epochMs - startEpochMs) / durationMs) * 100
+              : 100;
             const style = {
               '--bar-height': `${height}px`,
-              flexBasis: `${(point.intervalMinutes / totalMinutes) * 100}%`,
+              left: `${left}%`,
+              width: nextPoint ? `max(1px, calc(${nextLeft - left}% - 1px))` : '1px',
             } as CSSProperties;
             return (
               <span
@@ -132,7 +230,7 @@ export function Timeline({ points, selectedIndex, onSelect, timezone }: Timeline
         <span className="now-marker" style={{ left: `${nowPosition}%` }} aria-hidden="true" />
         <span
           className="selected-marker"
-          style={{ left: `${selectedPosition}%` }}
+          style={{ left: `${scrubPosition ?? selectedPosition}%` }}
           aria-hidden="true"
         />
         <div
@@ -141,9 +239,9 @@ export function Timeline({ points, selectedIndex, onSelect, timezone }: Timeline
           tabIndex={0}
           onPointerDown={startScrubbing}
           onPointerMove={continueScrubbing}
-          onPointerUp={stopScrubbing}
-          onPointerCancel={stopScrubbing}
-          onLostPointerCapture={stopScrubbing}
+          onPointerUp={(event) => stopScrubbing(event, true)}
+          onPointerCancel={(event) => stopScrubbing(event, false)}
+          onLostPointerCapture={(event) => stopScrubbing(event, false)}
           onKeyDown={handleKeyDown}
           aria-label="Select radar time"
           aria-orientation="horizontal"
