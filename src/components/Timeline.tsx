@@ -1,4 +1,9 @@
-import { useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
+import {
+  useRef,
+  type CSSProperties,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
+} from 'react';
 import type { TimelinePoint } from '../weather/types';
 
 interface TimelineProps {
@@ -27,6 +32,7 @@ function formatTime(epochMs: number, timezone?: string): string {
 
 export function Timeline({ points, selectedIndex, onSelect, timezone }: TimelineProps) {
   const isScrubbing = useRef(false);
+  const lastScrubbedIndex = useRef<number | undefined>(undefined);
   if (points.length === 0) return <div className="timeline-empty" />;
   const nowIndex = Math.max(0, points.findIndex((point) => point.phase === 'now'));
   const selected = points[selectedIndex] ?? points[0];
@@ -37,9 +43,9 @@ export function Timeline({ points, selectedIndex, onSelect, timezone }: Timeline
   const selectedPosition = ((selected.epochMs - startEpochMs) / durationMs) * 100;
   const nowPosition = ((points[nowIndex].epochMs - startEpochMs) / durationMs) * 100;
 
-  const selectAtPointer = (event: ReactPointerEvent<HTMLInputElement>) => {
+  const indexAtPointer = (event: ReactPointerEvent<HTMLDivElement>): number | undefined => {
     const bounds = event.currentTarget.getBoundingClientRect();
-    if (bounds.width <= 0) return;
+    if (bounds.width <= 0) return undefined;
     const ratio = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width));
     const targetEpochMs = startEpochMs + ratio * durationMs;
     let nearestIndex = 0;
@@ -51,25 +57,50 @@ export function Timeline({ points, selectedIndex, onSelect, timezone }: Timeline
         nearestDistance = distance;
       }
     });
-    onSelect(nearestIndex);
+    return nearestIndex;
   };
 
-  const startScrubbing = (event: ReactPointerEvent<HTMLInputElement>) => {
+  const startScrubbing = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
+    const nextIndex = indexAtPointer(event);
+    if (nextIndex === undefined) return;
     isScrubbing.current = true;
+    lastScrubbedIndex.current = nextIndex;
     event.currentTarget.focus();
     event.currentTarget.setPointerCapture?.(event.pointerId);
-    selectAtPointer(event);
+    onSelect(nextIndex);
   };
 
-  const continueScrubbing = (event: ReactPointerEvent<HTMLInputElement>) => {
+  const continueScrubbing = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!isScrubbing.current) return;
-    selectAtPointer(event);
+    const nextIndex = indexAtPointer(event);
+    if (nextIndex === undefined || nextIndex === lastScrubbedIndex.current) return;
+    lastScrubbedIndex.current = nextIndex;
+    onSelect(nextIndex);
   };
 
-  const stopScrubbing = (event: ReactPointerEvent<HTMLInputElement>) => {
+  const stopScrubbing = (event: ReactPointerEvent<HTMLDivElement>) => {
     isScrubbing.current = false;
-    event.currentTarget.releasePointerCapture?.(event.pointerId);
+    lastScrubbedIndex.current = undefined;
+    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  };
+
+  const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    let nextIndex: number | undefined;
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
+      nextIndex = selectedIndex - 1;
+    } else if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
+      nextIndex = selectedIndex + 1;
+    } else if (event.key === 'Home') {
+      nextIndex = 0;
+    } else if (event.key === 'End') {
+      nextIndex = points.length - 1;
+    }
+    if (nextIndex === undefined) return;
+    event.preventDefault();
+    onSelect(Math.max(0, Math.min(points.length - 1, nextIndex)));
   };
 
   return (
@@ -104,18 +135,21 @@ export function Timeline({ points, selectedIndex, onSelect, timezone }: Timeline
           style={{ left: `${selectedPosition}%` }}
           aria-hidden="true"
         />
-        <input
-          type="range"
-          min={0}
-          max={points.length - 1}
-          step={1}
-          value={selectedIndex}
-          onChange={(event) => onSelect(Number(event.target.value))}
+        <div
+          className="timeline-scrubber"
+          role="slider"
+          tabIndex={0}
           onPointerDown={startScrubbing}
           onPointerMove={continueScrubbing}
           onPointerUp={stopScrubbing}
           onPointerCancel={stopScrubbing}
+          onLostPointerCapture={stopScrubbing}
+          onKeyDown={handleKeyDown}
           aria-label="Select radar time"
+          aria-orientation="horizontal"
+          aria-valuemin={0}
+          aria-valuemax={points.length - 1}
+          aria-valuenow={selectedIndex}
           aria-valuetext={`${selected.phase}, ${formatTime(selected.epochMs, timezone)}, ${selected.precipitationRate.toFixed(1)} millimeters per hour`}
         />
       </div>
