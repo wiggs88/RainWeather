@@ -12,7 +12,7 @@ const point: TimelinePoint = {
   epochMs: Date.parse('2026-07-20T12:00:00Z'),
   intervalMinutes: 15,
   phase: 'now',
-  source: 'icon-d2',
+  source: 'open-meteo',
   precipitationRate: 0,
   precipitationAmount: 0,
   temperatureC: 18.4,

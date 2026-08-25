@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { buildRainSummary, classifyPrecipitation } from './rainWindow';
+import {
+  buildRainSummary,
+  classifyPrecipitation,
+  formatDurationMinutes,
+} from './rainWindow';
 import type { TimelinePoint } from './types';
 
 const NOW = Date.parse('2026-07-18T18:00:00Z');
@@ -36,6 +40,18 @@ describe('classifyPrecipitation', () => {
     expect(classifyPrecipitation(0.3)).toBe('light');
     expect(classifyPrecipitation(1.5)).toBe('moderate');
     expect(classifyPrecipitation(5)).toBe('heavy');
+  });
+});
+
+describe('formatDurationMinutes', () => {
+  it('uses minutes below one hour', () => {
+    expect(formatDurationMinutes(55)).toBe('55 MIN');
+  });
+
+  it('uses hours and remaining minutes from one hour onward', () => {
+    expect(formatDurationMinutes(60)).toBe('1 HR');
+    expect(formatDurationMinutes(95)).toBe('1 HR 35 MIN');
+    expect(formatDurationMinutes(300)).toBe('5 HR');
   });
 });
 
@@ -83,5 +99,10 @@ describe('buildRainSummary', () => {
 
   it('handles missing data without claiming a forecast', () => {
     expect(buildRainSummary([], NOW).headline).toBe('NO FORECAST DATA');
+  });
+
+  it('formats long rain windows in hours and minutes', () => {
+    const points = [point(0, 0), point(60, 0), point(75, 1, 'open-meteo')];
+    expect(buildRainSummary(points, NOW).headline).toBe('DRY FOR ABOUT 1 HR 15 MIN');
   });
 });

@@ -13,7 +13,7 @@ function forecast(minutes: number, temperatureC = 18): TimelinePoint {
     epochMs,
     intervalMinutes: 15,
     phase: 'forecast',
-    source: 'icon-d2',
+    source: 'open-meteo',
     precipitationRate: 1,
     precipitationAmount: 0.25,
     temperatureC,

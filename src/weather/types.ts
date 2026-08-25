@@ -1,5 +1,5 @@
 export type TimelinePhase = 'observed' | 'now' | 'forecast';
-export type WeatherSource = 'bright-sky' | 'icon-d2';
+export type WeatherSource = 'bright-sky' | 'open-meteo';
 export type Intensity = 'dry' | 'trace' | 'light' | 'moderate' | 'heavy';
 export type Confidence = 'high' | 'medium' | 'low';
 

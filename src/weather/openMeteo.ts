@@ -3,7 +3,7 @@ import { phaseForTimestamp } from './normalize';
 import type { Location, TimelinePoint } from './types';
 
 const GEOCODING_URL = 'https://geocoding-api.open-meteo.com/v1/search';
-const FORECAST_URL = 'https://api.open-meteo.com/v1/dwd-icon';
+const FORECAST_URL = 'https://api.open-meteo.com/v1/forecast';
 
 export const DEFAULT_LOCATION: Location = {
   id: '2950159',
@@ -28,10 +28,9 @@ interface GeocodingResponse {
   results?: GeocodingResult[];
 }
 
-interface DwdForecastResponse {
-  timezone?: string;
+interface ForecastResponse {
   minutely_15?: {
-    time?: string[];
+    time?: number[];
     precipitation?: number[];
     rain?: number[];
     showers?: number[];
@@ -79,7 +78,7 @@ export async function searchLocations(
   });
 }
 
-export async function fetchDwdForecast(
+export async function fetchForecast(
   location: Location,
   signal?: AbortSignal,
   nowMs = Date.now(),
@@ -91,10 +90,11 @@ export async function fetchDwdForecast(
     minutely_15: 'precipitation,rain,showers,lightning_potential,temperature_2m',
     past_minutely_15: '8',
     forecast_minutely_15: '40',
-    timezone: 'auto',
+    timeformat: 'unixtime',
+    timezone: 'GMT',
   }).toString();
 
-  const data = await fetchJson<DwdForecastResponse>(url, signal);
+  const data = await fetchJson<ForecastResponse>(url, signal);
   const series = data.minutely_15;
   const times = series?.time ?? [];
   const precipitation = series?.precipitation ?? [];
@@ -102,23 +102,24 @@ export async function fetchDwdForecast(
   const temperatures = series?.temperature_2m ?? [];
 
   if (times.length === 0) {
-    throw new Error('DWD forecast returned no timeline');
+    throw new Error('Forecast returned no timeline');
   }
 
-  return times.map((timestamp, index) => {
-    const epochMs = Date.parse(timestamp);
+  return times.map((epochSeconds, index) => {
+    const epochMs = epochSeconds * 1000;
+    const timestamp = new Date(epochMs).toISOString();
     const amount = Math.max(0, precipitation[index] ?? 0);
     const precipitationRate = amount * 4;
     const lightningPotential = Math.max(0, lightning[index] ?? 0);
     const temperatureC = temperatures[index];
 
     return {
-      id: `icon-${epochMs}`,
+      id: `forecast-${epochMs}`,
       timestamp,
       epochMs,
       intervalMinutes: 15,
       phase: phaseForTimestamp(epochMs, nowMs),
-      source: 'icon-d2',
+      source: 'open-meteo',
       precipitationRate,
       precipitationAmount: amount,
       ...(typeof temperatureC === 'number' && Number.isFinite(temperatureC)

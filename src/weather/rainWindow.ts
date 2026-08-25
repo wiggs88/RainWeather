@@ -81,6 +81,17 @@ function roundedMinutes(epochMs: number, nowMs: number): number {
   return Math.max(0, Math.round((epochMs - nowMs) / 300_000) * 5);
 }
 
+export function formatDurationMinutes(minutes: number): string {
+  const safeMinutes = Math.max(0, Math.round(minutes));
+  if (safeMinutes < 60) return `${safeMinutes} MIN`;
+
+  const hours = Math.floor(safeMinutes / 60);
+  const remainingMinutes = safeMinutes % 60;
+  return remainingMinutes > 0
+    ? `${hours} HR ${remainingMinutes} MIN`
+    : `${hours} HR`;
+}
+
 export function buildRainSummary(
   points: TimelinePoint[],
   nowMs = Date.now(),
@@ -114,7 +125,10 @@ export function buildRainSummary(
     const minutes = roundedMinutes(dryStart, nowMs);
 
     return {
-      headline: minutes <= 5 ? 'RAIN ENDING SOON' : `RAIN FOR ABOUT ${minutes} MIN`,
+      headline:
+        minutes <= 5
+          ? 'RAIN ENDING SOON'
+          : `RAIN FOR ABOUT ${formatDurationMinutes(minutes)}`,
       detail: 'A useful dry window follows.',
       confidence,
       currentIntensity: current.intensity,
@@ -142,7 +156,10 @@ export function buildRainSummary(
   const rainStart = points[nextWetIndex].epochMs;
   const minutes = roundedMinutes(rainStart, nowMs);
   return {
-    headline: minutes <= 5 ? 'RAIN STARTING SOON' : `DRY FOR ABOUT ${minutes} MIN`,
+    headline:
+      minutes <= 5
+        ? 'RAIN STARTING SOON'
+        : `DRY FOR ABOUT ${formatDurationMinutes(minutes)}`,
     detail: 'Rain is expected after this gap.',
     confidence,
     currentIntensity: 'dry',

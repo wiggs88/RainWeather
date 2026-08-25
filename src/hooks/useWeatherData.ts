@@ -3,7 +3,7 @@ import { decodeBrightSkyRadar } from '../radar/decode';
 import { fetchBrightSkyAlerts, fetchBrightSkyRadar } from '../weather/brightSky';
 import { readCachedSnapshot, writeCachedSnapshot } from '../weather/cache';
 import { mergeTimeline } from '../weather/normalize';
-import { fetchDwdForecast } from '../weather/openMeteo';
+import { fetchForecast } from '../weather/openMeteo';
 import { buildRainSummary } from '../weather/rainWindow';
 import { fetchRainViewerFrames } from '../weather/rainViewer';
 import type {
@@ -47,7 +47,7 @@ export function useWeatherData(location: Location): WeatherDataState {
     setStatus('loading');
     setError(undefined);
 
-    const forecastPromise = fetchDwdForecast(location, controller.signal, nowMs);
+    const forecastPromise = fetchForecast(location, controller.signal, nowMs);
     const radarPromise = fetchBrightSkyRadar(location, controller.signal, nowMs).then(
       (response) => decodeBrightSkyRadar(response, controller.signal, nowMs),
     );
@@ -93,7 +93,13 @@ export function useWeatherData(location: Location): WeatherDataState {
           point.epochMs <= nowMs + 6 * 60 * 60_000,
       );
       const notices: string[] = [];
-      if (!radar) notices.push('DWD nowcast unavailable — showing forecast timeline');
+      if (!radar) {
+        notices.push(
+          rainViewer.length > 0
+            ? 'Local nowcast unavailable — using RainViewer radar history'
+            : 'Local radar unavailable — showing forecast timeline',
+        );
+      }
       if (forecast.length === 0) notices.push('Longer forecast unavailable');
       if (!radar && rainViewer.length === 0) notices.push('Radar animation unavailable');
 
