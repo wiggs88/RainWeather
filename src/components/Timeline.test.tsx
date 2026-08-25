@@ -1,11 +1,24 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { TimelinePoint } from '../weather/types';
 import { Timeline } from './Timeline';
 
 const START = Date.parse('2026-07-18T20:00:00Z');
+let frameCallbacks: FrameRequestCallback[];
 
-afterEach(cleanup);
+beforeEach(() => {
+  frameCallbacks = [];
+  vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+    frameCallbacks.push(callback);
+    return frameCallbacks.length;
+  });
+  vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => undefined);
+});
+
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
 
 function point(index: number, minutes = index * 15): TimelinePoint {
   const epochMs = START + minutes * 60_000;
@@ -81,8 +94,65 @@ describe('Timeline', () => {
     fireEvent.pointerDown(slider, { pointerId: 2, pointerType: 'touch', clientX: 62.5 });
     fireEvent.pointerMove(slider, { pointerId: 2, pointerType: 'touch', clientX: 63 });
     fireEvent.pointerMove(slider, { pointerId: 2, pointerType: 'touch', clientX: 25 });
+    frameCallbacks.shift()?.(0);
 
     expect(onSelect.mock.calls).toEqual([[3], [2]]);
+  });
+
+  it('keeps the visual marker exactly under the pressed position', () => {
+    const onSelect = vi.fn();
+    const { container } = render(
+      <Timeline
+        points={[0, 1, 2, 3, 4].map(point)}
+        selectedIndex={1}
+        onSelect={onSelect}
+        timezone="UTC"
+      />,
+    );
+
+    const slider = screen.getByRole('slider');
+    Object.defineProperty(slider, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({ left: 0, right: 100, width: 100, top: 0, bottom: 50, height: 50 }),
+    });
+    Object.defineProperty(slider, 'setPointerCapture', {
+      configurable: true,
+      value: vi.fn(),
+    });
+
+    fireEvent.pointerDown(slider, { pointerId: 4, pointerType: 'touch', clientX: 37 });
+
+    expect(container.querySelector('.selected-marker')).toHaveStyle({ left: '37%' });
+  });
+
+  it('uses the geometry captured at pointer down for the whole drag', () => {
+    const onSelect = vi.fn();
+    render(
+      <Timeline
+        points={[0, 1, 2, 3, 4].map(point)}
+        selectedIndex={1}
+        onSelect={onSelect}
+        timezone="UTC"
+      />,
+    );
+
+    const slider = screen.getByRole('slider');
+    let bounds = { left: 0, right: 100, width: 100, top: 0, bottom: 50, height: 50 };
+    Object.defineProperty(slider, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => bounds,
+    });
+    Object.defineProperty(slider, 'setPointerCapture', {
+      configurable: true,
+      value: vi.fn(),
+    });
+
+    fireEvent.pointerDown(slider, { pointerId: 5, pointerType: 'touch', clientX: 25 });
+    bounds = { ...bounds, left: 50, width: 50 };
+    fireEvent.pointerMove(slider, { pointerId: 5, pointerType: 'touch', clientX: 75 });
+    frameCallbacks.shift()?.(0);
+
+    expect(onSelect).toHaveBeenLastCalledWith(3);
   });
 
   it('stops updating after pointer cancellation', () => {

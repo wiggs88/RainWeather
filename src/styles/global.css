@@ -250,7 +250,8 @@ a:focus-visible {
 }
 
 .search-results button:hover,
-.search-results button:focus-visible {
+.search-results button:focus-visible,
+.search-results button.is-active {
   background: var(--surface-raised);
 }
 
@@ -524,15 +525,12 @@ a:focus-visible {
 .timeline-bars {
   position: absolute;
   inset: 8px 0 0;
-  display: flex;
-  align-items: end;
-  gap: 1px;
 }
 
 .timeline-bar {
-  position: relative;
+  position: absolute;
+  bottom: 0;
   height: var(--bar-height);
-  min-width: 1px;
   border-radius: 1px 1px 0 0;
   background: var(--faint);
 }
