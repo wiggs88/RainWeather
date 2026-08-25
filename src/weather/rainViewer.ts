@@ -21,6 +21,6 @@ export async function fetchRainViewerFrames(
     id: `rainviewer-${frame.time}`,
     timestamp: new Date(frame.time * 1000).toISOString(),
     epochMs: frame.time * 1000,
-    tileTemplate: `${data.host}${frame.path}/256/{z}/{x}/{y}/2/1_1.png`,
+    tileTemplate: `${data.host}${frame.path}/256/{z}/{x}/{y}/2/0_1.png`,
   }));
 }

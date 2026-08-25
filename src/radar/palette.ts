@@ -1,31 +1,20 @@
-function mix(start: number, end: number, amount: number): number {
-  return Math.round(start + (end - start) * amount);
-}
+type Rgba = [number, number, number, number];
 
-function mixColor(
-  start: [number, number, number],
-  end: [number, number, number],
-  amount: number,
-): [number, number, number] {
-  return [
-    mix(start[0], end[0], amount),
-    mix(start[1], end[1], amount),
-    mix(start[2], end[2], amount),
-  ];
-}
+// Shared cool-to-warm radar language, aligned with the published RainViewer
+// Universal Blue progression and common mm/h intensity bands.
+const INTENSITY_BANDS: ReadonlyArray<{ maxRate: number; color: Rgba }> = [
+  { maxRate: 0.5, color: [88, 216, 245, 130] },
+  { maxRate: 1, color: [0, 163, 224, 155] },
+  { maxRate: 2, color: [0, 119, 170, 175] },
+  { maxRate: 4, color: [0, 85, 136, 190] },
+  { maxRate: 8, color: [255, 238, 0, 215] },
+  { maxRate: 16, color: [255, 149, 0, 225] },
+  { maxRate: 32, color: [193, 0, 0, 235] },
+  { maxRate: 64, color: [255, 108, 255, 240] },
+  { maxRate: Number.POSITIVE_INFINITY, color: [255, 255, 255, 245] },
+];
 
-export function rateToRgba(rate: number): [number, number, number, number] {
+export function rateToRgba(rate: number): Rgba {
   if (!Number.isFinite(rate) || rate < 0.1) return [0, 0, 0, 0];
-
-  if (rate < 1.5) {
-    const color = mixColor([88, 216, 245], [22, 140, 255], rate / 1.5);
-    return [...color, Math.round(110 + Math.min(1, rate / 1.5) * 35)];
-  }
-  if (rate < 5) {
-    const color = mixColor([22, 140, 255], [49, 85, 255], (rate - 1.5) / 3.5);
-    return [...color, 170];
-  }
-
-  const color = mixColor([49, 85, 255], [179, 107, 255], Math.min(1, (rate - 5) / 15));
-  return [...color, 210];
+  return INTENSITY_BANDS.find((band) => rate < band.maxRate)!.color;
 }
