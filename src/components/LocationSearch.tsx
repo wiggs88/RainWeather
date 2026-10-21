@@ -167,7 +167,7 @@ export function LocationSearch({ location, onSelect }: LocationSearchProps) {
   return (
     <header className="location-shell">
       <div className="brand" aria-label="HOWDRY?!">
-        <span className="brand-mark" aria-hidden="true" />
+        <img className="brand-mark" src={`${import.meta.env.BASE_URL}favicon.png`} alt="" />
         <span>HOWDRY?!</span>
       </div>
       <form className="location-search" onSubmit={handleSubmit} role="search">

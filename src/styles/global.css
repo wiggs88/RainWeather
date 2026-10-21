@@ -149,10 +149,8 @@ a:focus-visible {
 }
 
 .brand-mark {
-  width: 16px;
-  height: 10px;
-  border-top: 2px solid var(--light-rain);
-  border-bottom: 2px solid var(--rain);
+  width: 22px;
+  height: 22px;
 }
 
 .location-search {
