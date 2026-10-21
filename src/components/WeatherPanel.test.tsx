@@ -71,5 +71,29 @@ describe('WeatherPanel', () => {
     expect(gauge.parentElement).toBe(headlineRow);
     expect(gauge.nextElementSibling).toBe(intensityLine);
     expect(screen.getByRole('heading', { name: 'DRY FOR NOW' })).toBeInTheDocument();
+    expect(screen.queryByText(/DRY WINDOW/)).not.toBeInTheDocument();
+  });
+
+  it('shows the dry window before upcoming rain', () => {
+    const rainAt = point.epochMs + 45 * 60_000;
+    render(
+      <WeatherPanel
+        status="ready"
+        snapshot={{
+          ...snapshot,
+          summary: {
+            ...snapshot.summary,
+            headline: 'DRY FOR ABOUT 45 MIN',
+            nextChangeEpochMs: rainAt,
+            dryWindowStartEpochMs: point.epochMs,
+            dryWindowEndEpochMs: rainAt,
+          },
+        }}
+        playback={playback}
+        onRefresh={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText('DRY WINDOW 14:00–14:45')).toBeInTheDocument();
   });
 });

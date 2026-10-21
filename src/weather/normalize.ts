@@ -58,7 +58,12 @@ function markNearestAsNow(points: TimelinePoint[], nowMs: number): TimelinePoint
 
   return points.map((point, index) => ({
     ...point,
-    phase: index === nearestIndex ? 'now' : phaseForTimestamp(point.epochMs, nowMs),
+    phase:
+      index === nearestIndex
+        ? 'now'
+        : index < nearestIndex
+          ? 'observed'
+          : 'forecast',
   }));
 }
 

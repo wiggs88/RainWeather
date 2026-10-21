@@ -70,6 +70,20 @@ describe('mergeTimeline', () => {
     expect(merged.find((point) => point.id === 'radar-11')?.temperatureC).toBe(17);
   });
 
+  it('marks exactly one point as now when two are equally close', () => {
+    const radar = [-2.5, 2.5].map((minutes) =>
+      radarSampleToTimelinePoint(
+        `radar-${minutes}`,
+        new Date(NOW + minutes * 60_000).toISOString(),
+        0,
+        NOW,
+      ),
+    );
+    const merged = mergeTimeline(radar, [], NOW);
+
+    expect(merged.map((point) => point.phase)).toEqual(['now', 'forecast']);
+  });
+
   it('returns forecast-only data when radar is unavailable', () => {
     const merged = mergeTimeline([], [forecast(0), forecast(15)], NOW);
     expect(merged).toHaveLength(2);

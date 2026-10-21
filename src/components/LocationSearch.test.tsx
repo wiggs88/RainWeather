@@ -114,6 +114,25 @@ describe('LocationSearch', () => {
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
   });
 
+  it('shows geolocation failures without a typed query', () => {
+    const getCurrentPosition = vi.fn(
+      (_success: PositionCallback, error?: PositionErrorCallback | null) =>
+        error?.({
+          code: 3,
+          PERMISSION_DENIED: 1,
+          POSITION_UNAVAILABLE: 2,
+          TIMEOUT: 3,
+        } as GeolocationPositionError),
+    );
+    vi.stubGlobal('navigator', { ...navigator, geolocation: { getCurrentPosition } });
+    render(<LocationSearch location={berlin} onSelect={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Use current location' }));
+
+    expect(screen.getByText('LOCATION TIMED OUT')).toBeInTheDocument();
+    vi.unstubAllGlobals();
+  });
+
   it('keeps GO as an immediate search fallback', async () => {
     mockedSearchLocations.mockResolvedValue([cardiff]);
     render(<LocationSearch location={berlin} onSelect={vi.fn()} />);
