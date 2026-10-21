@@ -10,3 +10,13 @@ A minimal rain radar and short-term precipitation timeline.
 npm install
 npm run dev
 ```
+
+## Verify
+
+```bash
+npm run typecheck
+npm test
+npm run build
+```
+
+Pull requests run the same checks in CI; pushes to `main` deploy to GitHub Pages.

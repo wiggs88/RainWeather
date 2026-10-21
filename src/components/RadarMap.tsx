@@ -37,6 +37,17 @@ const markerStyle = new Style({
 });
 
 const PANEL_RESERVED_HEIGHT = 190;
+const DEFAULT_ZOOM = 8.6;
+
+// Keep the location visible above the weather panel that overlaps the map.
+function centerLocation(map: Map, location: Location): void {
+  const size = map.getSize();
+  if (!size) return;
+  const targetY = Math.max(160, (size[1] - PANEL_RESERVED_HEIGHT) / 2 + 48);
+  map
+    .getView()
+    .centerOn(fromLonLat([location.longitude, location.latitude]), size, [size[0] / 2, targetY]);
+}
 
 function closestRainViewerFrame(
   frames: RainViewerFrame[],
@@ -84,7 +95,7 @@ export function RadarMap({
       layers: [baseGroup, fallbackLayerRef.current, radarLayerRef.current, markerLayer],
       view: new View({
         center: fromLonLat([location.longitude, location.latitude]),
-        zoom: 8.6,
+        zoom: DEFAULT_ZOOM,
         minZoom: 4,
         maxZoom: 12,
       }),
@@ -95,23 +106,12 @@ export function RadarMap({
       // The weather layers remain useful if the optional vector basemap is delayed.
     });
 
-    const placeLocationInView = () => {
-      const size = map.getSize();
-      if (!size) return;
-      const currentLocation = locationRef.current;
-      const targetY = Math.max(160, (size[1] - PANEL_RESERVED_HEIGHT) / 2 + 48);
-      map.getView().centerOn(
-        fromLonLat([currentLocation.longitude, currentLocation.latitude]),
-        size,
-        [size[0] / 2, targetY],
-      );
-    };
     const observer = new ResizeObserver(() => {
       map.updateSize();
-      placeLocationInView();
+      centerLocation(map, locationRef.current);
     });
     observer.observe(targetRef.current);
-    placeLocationInView();
+    centerLocation(map, locationRef.current);
 
     return () => {
       observer.disconnect();
@@ -123,15 +123,12 @@ export function RadarMap({
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    const coordinate = fromLonLat([location.longitude, location.latitude]);
     markerSourceRef.current.clear();
-    markerSourceRef.current.addFeature(new Feature(new Point(coordinate)));
-    map.getView().setZoom(8.6);
-    const size = map.getSize();
-    if (size) {
-      const targetY = Math.max(160, (size[1] - PANEL_RESERVED_HEIGHT) / 2 + 48);
-      map.getView().centerOn(coordinate, size, [size[0] / 2, targetY]);
-    }
+    markerSourceRef.current.addFeature(
+      new Feature(new Point(fromLonLat([location.longitude, location.latitude]))),
+    );
+    map.getView().setZoom(DEFAULT_ZOOM);
+    centerLocation(map, location);
   }, [location]);
 
   useEffect(() => {
@@ -176,5 +173,7 @@ export function RadarMap({
     }
   }, [radarFrames, rainViewerFrames, selectedPoint]);
 
-  return <div ref={targetRef} className="radar-map" aria-label="Animated precipitation map" />;
+  return (
+    <div ref={targetRef} className="radar-map" role="img" aria-label="Animated precipitation map" />
+  );
 }

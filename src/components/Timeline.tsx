@@ -6,6 +6,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react';
+import { formatClockTime as formatTime } from '../weather/format';
 import type { TimelinePoint } from '../weather/types';
 
 interface TimelineProps {
@@ -14,8 +15,6 @@ interface TimelineProps {
   onSelect: (index: number) => void;
   timezone?: string;
 }
-
-const timeFormatterCache = new Map<string, Intl.DateTimeFormat>();
 
 interface ScrubGeometry {
   pointerId: number;
@@ -29,21 +28,6 @@ interface ScrubGeometry {
 interface ScrubTarget {
   index: number;
   position: number;
-}
-
-function formatTime(epochMs: number, timezone?: string): string {
-  const key = timezone || 'local';
-  let formatter = timeFormatterCache.get(key);
-  if (!formatter) {
-    formatter = new Intl.DateTimeFormat(undefined, {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-      timeZone: timezone,
-    });
-    timeFormatterCache.set(key, formatter);
-  }
-  return formatter.format(epochMs);
 }
 
 export function Timeline({ points, selectedIndex, onSelect, timezone }: TimelineProps) {

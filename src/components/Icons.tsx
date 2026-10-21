@@ -49,15 +49,6 @@ export function PauseIcon(props: IconProps) {
   );
 }
 
-export function RefreshIcon(props: IconProps) {
-  return (
-    <svg {...common} {...props}>
-      <path d="M19 7v4h-4" />
-      <path d="M5.7 17A8 8 0 1 0 6 6.7L5 9" />
-    </svg>
-  );
-}
-
 export function CrosshairIcon(props: IconProps) {
   return (
     <svg {...common} {...props}>
