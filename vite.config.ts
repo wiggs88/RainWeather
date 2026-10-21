@@ -10,7 +10,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['rainweather.svg', 'icon-192.png', 'icon-512.png'],
+      includeAssets: ['favicon.png', 'apple-touch-icon.png'],
       manifest: {
         name: 'HOWDRY?!',
         short_name: 'HOWDRY?!',
@@ -31,7 +31,7 @@ export default defineConfig({
             type: 'image/png',
           },
           {
-            src: 'icon-512.png',
+            src: 'icon-512-maskable.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
