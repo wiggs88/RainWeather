@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { formatClockTime as formatTime } from '../weather/format';
 
 interface TemperatureGaugeProps {
   temperatureC?: number;
@@ -8,15 +9,6 @@ interface TemperatureGaugeProps {
 
 const BASE_MIN_C = -20;
 const BASE_MAX_C = 40;
-
-function formatTime(epochMs: number, timezone?: string): string {
-  return new Intl.DateTimeFormat(undefined, {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-    timeZone: timezone,
-  }).format(epochMs);
-}
 
 export function TemperatureGauge({
   temperatureC,

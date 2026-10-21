@@ -6,12 +6,7 @@ import { mergeTimeline } from '../weather/normalize';
 import { fetchForecast } from '../weather/openMeteo';
 import { buildRainSummary } from '../weather/rainWindow';
 import { fetchRainViewerFrames } from '../weather/rainViewer';
-import type {
-  Location,
-  RadarFrame,
-  WeatherLoadStatus,
-  WeatherSnapshot,
-} from '../weather/types';
+import type { Location, WeatherLoadStatus, WeatherSnapshot } from '../weather/types';
 
 interface WeatherDataState {
   status: WeatherLoadStatus;
@@ -20,9 +15,7 @@ interface WeatherDataState {
   refresh: () => void;
 }
 
-function isAbort(error: unknown): boolean {
-  return error instanceof DOMException && error.name === 'AbortError';
-}
+const REFRESH_INTERVAL_MS = 5 * 60_000;
 
 export function useWeatherData(location: Location): WeatherDataState {
   const [status, setStatus] = useState<WeatherLoadStatus>('idle');
@@ -30,18 +23,32 @@ export function useWeatherData(location: Location): WeatherDataState {
   const [error, setError] = useState<string>();
   const [refreshKey, setRefreshKey] = useState(0);
   const objectUrls = useRef<string[]>([]);
+  const lastLoadStartedAt = useRef(0);
   const refresh = useCallback(() => setRefreshKey((value) => value + 1), []);
 
   useEffect(() => {
-    const interval = window.setInterval(() => {
-      if (document.visibilityState === 'visible') refresh();
-    }, 5 * 60_000);
-    return () => window.clearInterval(interval);
+    const refreshIfStale = () => {
+      if (
+        document.visibilityState === 'visible' &&
+        Date.now() - lastLoadStartedAt.current >= REFRESH_INTERVAL_MS
+      ) {
+        refresh();
+      }
+    };
+    // Timers are throttled while the app is backgrounded, so also catch up
+    // as soon as it becomes visible again.
+    const interval = window.setInterval(refreshIfStale, REFRESH_INTERVAL_MS);
+    document.addEventListener('visibilitychange', refreshIfStale);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener('visibilitychange', refreshIfStale);
+    };
   }, [refresh]);
 
   useEffect(() => {
     const controller = new AbortController();
     const nowMs = Date.now();
+    lastLoadStartedAt.current = nowMs;
     const cached = readCachedSnapshot(location);
     if (cached) setSnapshot(cached);
     setStatus('loading');
@@ -60,7 +67,13 @@ export function useWeatherData(location: Location): WeatherDataState {
       rainViewerPromise,
       alertsPromise,
     ]).then(([forecastResult, radarResult, rainViewerResult, alertsResult]) => {
-      if (controller.signal.aborted) return;
+      if (controller.signal.aborted) {
+        // A superseded load may still have finished decoding; free its frames.
+        if (radarResult.status === 'fulfilled') {
+          radarResult.value.frames.forEach((frame) => URL.revokeObjectURL(frame.imageUrl));
+        }
+        return;
+      }
 
       const forecast = forecastResult.status === 'fulfilled' ? forecastResult.value : [];
       const radar = radarResult.status === 'fulfilled' ? radarResult.value : undefined;

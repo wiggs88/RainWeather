@@ -1,4 +1,5 @@
 import type { PlaybackState } from '../hooks/usePlayback';
+import { formatClockTime as formatTime } from '../weather/format';
 import type {
   WeatherLoadStatus,
   WeatherSnapshot,
@@ -13,15 +14,6 @@ interface WeatherPanelProps {
   error?: string;
   playback: PlaybackState;
   onRefresh: () => void;
-}
-
-function formatTime(epochMs: number, timezone?: string): string {
-  return new Intl.DateTimeFormat(undefined, {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-    timeZone: timezone,
-  }).format(epochMs);
 }
 
 function formatUpdated(epochMs: number): string {
@@ -55,9 +47,9 @@ export function WeatherPanel({
 
   const { summary, location, alerts, notices } = snapshot;
   const windowText =
-    summary.headline !== 'DRY FOR NOW' &&
-    summary.dryWindowStartEpochMs &&
-    summary.dryWindowEndEpochMs
+    summary.nextChangeEpochMs !== undefined &&
+    summary.dryWindowStartEpochMs !== undefined &&
+    summary.dryWindowEndEpochMs !== undefined
       ? `${formatTime(summary.dryWindowStartEpochMs, location.timezone)}–${formatTime(
           summary.dryWindowEndEpochMs,
           location.timezone,

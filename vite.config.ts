@@ -39,6 +39,8 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // Include the self-hosted fonts so the installed app renders offline.
+        globPatterns: ['**/*.{js,css,html,woff2}'],
         navigateFallbackDenylist: [/^\/api\//],
         runtimeCaching: [
           {

@@ -102,6 +102,7 @@ export async function decodeBrightSkyRadar(
       worker.terminate();
 
       try {
+        if (decoded.length === 0) throw new Error('No radar frames could be decoded');
         const sorted = [...decoded].sort((a, b) => a.index - b.index);
         const imageUrls = await Promise.all(
           sorted.map((frame) => rgbaToObjectUrl(frame.rgba, width, height)),

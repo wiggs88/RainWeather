@@ -40,7 +40,11 @@ export function App() {
   const playback = usePlayback(timeline);
 
   useEffect(() => {
-    localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(location));
+    try {
+      localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(location));
+    } catch {
+      // Storage can be unavailable in private browsing or a restricted iframe.
+    }
   }, [location]);
 
   return (

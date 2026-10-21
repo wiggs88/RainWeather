@@ -18,6 +18,12 @@ interface LocationSearchProps {
 const SEARCH_DELAY_MS = 250;
 const RESULTS_ID = 'location-results';
 
+function geolocationErrorMessage(error: GeolocationPositionError): string {
+  if (error.code === error.PERMISSION_DENIED) return 'LOCATION PERMISSION DENIED';
+  if (error.code === error.TIMEOUT) return 'LOCATION TIMED OUT';
+  return 'LOCATION UNAVAILABLE';
+}
+
 export function LocationSearch({ location, onSelect }: LocationSearchProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Location[]>([]);
@@ -137,6 +143,7 @@ export function LocationSearch({ location, onSelect }: LocationSearchProps) {
   };
 
   const useCurrentLocation = () => {
+    setIsDismissed(false);
     if (!navigator.geolocation) {
       setMessage('LOCATION NOT SUPPORTED');
       return;
@@ -156,13 +163,15 @@ export function LocationSearch({ location, onSelect }: LocationSearchProps) {
         setMessage(undefined);
         setResults([]);
       },
-      () => setMessage('LOCATION PERMISSION DENIED'),
+      (error) => setMessage(geolocationErrorMessage(error)),
       { enableHighAccuracy: true, timeout: 10_000, maximumAge: 300_000 },
     );
   };
 
+  // Geolocation status messages appear even when nothing has been typed.
   const showResults =
-    !isDismissed && query.trim().length >= 2 && (isSearching || results.length > 0 || Boolean(message));
+    !isDismissed &&
+    (Boolean(message) || (query.trim().length >= 2 && (isSearching || results.length > 0)));
 
   return (
     <header className="location-shell">
