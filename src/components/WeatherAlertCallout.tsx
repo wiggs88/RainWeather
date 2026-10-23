@@ -29,13 +29,18 @@ function formatAlertTime(epochMs: number, timezone?: string, nowMs = Date.now())
   return `${weekday} ${time}`;
 }
 
-function alertTiming(alert: WeatherAlert, timezone?: string, nowMs = Date.now()): string {
+function alertTiming(
+  alert: WeatherAlert,
+  timezone?: string,
+  compact = false,
+  nowMs = Date.now(),
+): string {
   const { onsetEpochMs: onset, expiresEpochMs: expires } = alert;
   if (onset !== undefined && onset > nowMs) {
-    const from = `from ${formatAlertTime(onset, timezone, nowMs)}`;
-    return expires !== undefined
-      ? `${from} to ${formatAlertTime(expires, timezone, nowMs)}`
-      : from;
+    const start = formatAlertTime(onset, timezone, nowMs);
+    if (expires === undefined) return `from ${start}`;
+    const end = formatAlertTime(expires, timezone, nowMs);
+    return compact ? `${start}–${end}` : `from ${start} to ${end}`;
   }
   if (expires !== undefined) return `until ${formatAlertTime(expires, timezone, nowMs)}`;
   return 'in effect';
@@ -62,7 +67,7 @@ export function WeatherAlertCallout({ alerts, timezone }: WeatherAlertCalloutPro
   const [primary] = alerts;
   const others = alerts.length - 1;
   const kicker = primary.severity === 'unknown' ? 'Warning' : `${capitalize(primary.severity)} warning`;
-  const timing = `${alertTiming(primary, timezone)}${others > 0 ? ` · +${others} more` : ''}`;
+  const timing = `${alertTiming(primary, timezone, true)}${others > 0 ? ` · +${others}` : ''}`;
 
   return (
     <>
@@ -79,14 +84,11 @@ export function WeatherAlertCallout({ alerts, timezone }: WeatherAlertCalloutPro
           type="button"
           onClick={() => setIsOpen(true)}
           aria-haspopup="dialog"
-          aria-label={`${kicker}: ${alertTitle(primary)}, ${timing}. Show details`}
+          aria-label={`${kicker}: ${alertTitle(primary)}, ${alertTiming(primary, timezone)}${
+            others > 0 ? `, plus ${others} more` : ''
+          }. Show details`}
         >
-          <span className="alert-kicker">
-            {primary.severity === 'unknown' ? null : (
-              <span className="alert-severity">{primary.severity.toUpperCase()}&nbsp;</span>
-            )}
-            WARNING
-          </span>
+          <span className="alert-kicker">WARNING</span>
           <strong>{alertTitle(primary)}</strong>
           <span className="alert-meta">{timing}</span>
           <span className="alert-chevron" aria-hidden="true">
