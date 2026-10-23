@@ -149,8 +149,9 @@ a:focus-visible {
 }
 
 .brand-mark {
-  width: 22px;
-  height: 22px;
+  width: 21px;
+  height: 21px;
+  image-rendering: pixelated;
 }
 
 .location-search {
