@@ -11,6 +11,8 @@ npm install
 npm run dev
 ```
 
+The dev server only listens on this machine. To try it on a phone on the same network, run `npm run dev -- --host`.
+
 ## Verify
 
 ```bash
