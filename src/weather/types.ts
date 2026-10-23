@@ -48,8 +48,13 @@ export interface RainViewerFrame {
 export interface WeatherAlert {
   id: string;
   headline: string;
+  event?: string;
   description?: string;
+  instruction?: string;
   severity: 'minor' | 'moderate' | 'severe' | 'extreme' | 'unknown';
+  onsetEpochMs?: number;
+  expiresEpochMs?: number;
+  sourceUrl?: string;
 }
 
 export interface RainSummary {

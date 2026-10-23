@@ -325,25 +325,193 @@ a:focus-visible {
   text-align: right;
 }
 
-.alert-strip {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 12px;
-  margin: 12px 0 0;
-  padding: 9px 10px;
-  border: 1px solid color-mix(in srgb, var(--warning) 50%, var(--border));
-  border-radius: 7px;
-  color: var(--warning);
-  font-size: 10px;
-  letter-spacing: 0.05em;
+/* Warning callout: the pixel duck "says" the warning in a speech bubble that
+   straddles the panel's top edge. */
+.weather-panel.has-alert {
+  padding-top: 30px;
 }
 
-.alert-strip strong {
+.alert-callout {
+  position: absolute;
+  top: 0;
+  left: 12px;
+  display: flex;
+  max-width: calc(100% - 24px);
+  align-items: center;
+  gap: 12px;
+  transform: translateY(-50%);
+}
+
+.alert-duck {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  image-rendering: pixelated;
+}
+
+.alert-bubble {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 44px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    'kicker title chevron'
+    'kicker meta chevron';
+  align-items: center;
+  column-gap: 10px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--text);
+  color: var(--canvas);
+  text-align: left;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.45);
+  transition: background-color 180ms ease-out;
+}
+
+/* Tail pointing back at the duck. */
+.alert-bubble::before {
+  position: absolute;
+  top: 50%;
+  left: -7px;
+  border-width: 7px 8px 7px 0;
+  border-style: solid;
+  border-color: transparent var(--text) transparent transparent;
+  content: '';
+  transform: translateY(-50%);
+  transition: border-color 180ms ease-out;
+}
+
+.alert-bubble:hover,
+.alert-bubble:focus-visible {
+  background: #ffffff;
+}
+
+.alert-bubble:hover::before,
+.alert-bubble:focus-visible::before {
+  border-right-color: #ffffff;
+}
+
+.alert-bubble:focus-visible {
+  outline: 2px solid var(--warning);
+  outline-offset: 2px;
+}
+
+.alert-kicker {
+  grid-area: kicker;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  padding-right: 10px;
+  border-right: 1px solid rgb(9 11 13 / 0.15);
+  color: #b35a00;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+}
+
+.alert-bubble.severity-severe .alert-kicker,
+.alert-bubble.severity-extreme .alert-kicker {
+  color: #c10000;
+}
+
+.alert-bubble strong {
+  grid-area: title;
   overflow: hidden;
-  color: var(--text);
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.alert-meta {
+  grid-area: meta;
+  overflow: hidden;
+  color: #4a535b;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 479px) {
+  .alert-severity {
+    display: none;
+  }
+}
+
+.alert-chevron {
+  grid-area: chevron;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.alert-dialog {
+  width: min(560px, calc(100vw - 24px));
+  max-height: min(80vh, 640px);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.alert-dialog::backdrop {
+  background: rgb(0 0 0 / 0.6);
+}
+
+.alert-dialog-body {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+}
+
+.alert-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.alert-detail {
+  padding-left: 12px;
+  border-left: 3px solid var(--warning);
+}
+
+.alert-detail.severity-severe,
+.alert-detail.severity-extreme {
+  border-left-color: #c10000;
+}
+
+.alert-detail h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.alert-detail p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre-line;
+}
+
+.alert-detail .alert-detail-meta {
+  margin-top: 4px;
+  color: var(--warning);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+
+.alert-detail .alert-instruction {
+  color: var(--text);
+}
+
+.alert-source {
+  color: var(--light-rain);
+  font-size: 11px;
+  letter-spacing: 0.05em;
 }
 
 .rain-status {
