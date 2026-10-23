@@ -1,18 +1,15 @@
 import { apply } from 'ol-mapbox-style';
-import Feature from 'ol/Feature';
 import Map from 'ol/Map';
+import Overlay from 'ol/Overlay';
 import View from 'ol/View';
-import Point from 'ol/geom/Point';
 import LayerGroup from 'ol/layer/Group';
 import ImageLayer from 'ol/layer/Image';
 import TileLayer from 'ol/layer/Tile';
-import VectorLayer from 'ol/layer/Vector';
 import { fromLonLat } from 'ol/proj';
 import ImageStatic from 'ol/source/ImageStatic';
-import VectorSource from 'ol/source/Vector';
 import XYZ from 'ol/source/XYZ';
-import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { DWD_PROJECTION_CODE, registerDwdProjection } from '../radar/dwdProjection';
 import type {
   Location,
@@ -20,6 +17,7 @@ import type {
   RainViewerFrame,
   TimelinePoint,
 } from '../weather/types';
+import { LocationDuck } from './LocationDuck';
 
 interface RadarMapProps {
   location: Location;
@@ -27,14 +25,6 @@ interface RadarMapProps {
   radarFrames: RadarFrame[];
   rainViewerFrames: RainViewerFrame[];
 }
-
-const markerStyle = new Style({
-  image: new CircleStyle({
-    radius: 7,
-    fill: new Fill({ color: '#f2f5f7' }),
-    stroke: new Stroke({ color: '#090b0d', width: 3 }),
-  }),
-});
 
 const PANEL_RESERVED_HEIGHT = 190;
 const DEFAULT_ZOOM = 8.6;
@@ -77,22 +67,26 @@ export function RadarMap({
   const mapRef = useRef<Map | undefined>(undefined);
   const radarLayerRef = useRef(new ImageLayer({ opacity: 0.82 }));
   const fallbackLayerRef = useRef(new TileLayer({ visible: false, opacity: 0.72 }));
-  const markerSourceRef = useRef(new VectorSource());
+  const [markerElement] = useState(() => document.createElement('div'));
+  const markerRef = useRef<Overlay | undefined>(undefined);
 
   useEffect(() => {
     if (!targetRef.current || mapRef.current) return;
     registerDwdProjection();
 
     const baseGroup = new LayerGroup();
-    const markerLayer = new VectorLayer({
-      source: markerSourceRef.current,
-      style: markerStyle,
-      zIndex: 30,
+    const marker = new Overlay({
+      element: markerElement,
+      positioning: 'center-center',
+      stopEvent: false,
+      position: fromLonLat([location.longitude, location.latitude]),
     });
+    markerRef.current = marker;
     const map = new Map({
       target: targetRef.current,
       controls: [],
-      layers: [baseGroup, fallbackLayerRef.current, radarLayerRef.current, markerLayer],
+      layers: [baseGroup, fallbackLayerRef.current, radarLayerRef.current],
+      overlays: [marker],
       view: new View({
         center: fromLonLat([location.longitude, location.latitude]),
         zoom: DEFAULT_ZOOM,
@@ -123,10 +117,7 @@ export function RadarMap({
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    markerSourceRef.current.clear();
-    markerSourceRef.current.addFeature(
-      new Feature(new Point(fromLonLat([location.longitude, location.latitude]))),
-    );
+    markerRef.current?.setPosition(fromLonLat([location.longitude, location.latitude]));
     map.getView().setZoom(DEFAULT_ZOOM);
     centerLocation(map, location);
   }, [location]);
@@ -174,6 +165,9 @@ export function RadarMap({
   }, [radarFrames, rainViewerFrames, selectedPoint]);
 
   return (
-    <div ref={targetRef} className="radar-map" role="img" aria-label="Animated precipitation map" />
+    <>
+      <div ref={targetRef} className="radar-map" role="img" aria-label="Animated precipitation map" />
+      {createPortal(<LocationDuck intensity={selectedPoint?.intensity} />, markerElement)}
+    </>
   );
 }
