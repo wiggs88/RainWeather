@@ -2,6 +2,62 @@ import type { Location, WeatherAlert } from './types';
 
 const BRIGHT_SKY_URL = 'https://api.brightsky.dev';
 const RADAR_DISTANCE_METERS = 200_000;
+const SEVERITY_RANK: Record<WeatherAlert['severity'], number> = {
+  extreme: 4,
+  severe: 3,
+  moderate: 2,
+  minor: 1,
+  unknown: 0,
+};
+const DWD_WARNINGS_URL: Record<AlertLanguage, string> = {
+  en: 'https://www.dwd.de/EN/weather/warnings/warnings_node.html',
+  de: 'https://www.dwd.de/DE/wetter/warnungen/warnWetter_node.html',
+};
+
+function preferredAlertLanguage(): AlertLanguage {
+  return navigator.language?.toLowerCase().startsWith('de') ? 'de' : 'en';
+}
+
+function parseEpochMs(value?: string | null): number | undefined {
+  const epochMs = value ? Date.parse(value) : Number.NaN;
+  return Number.isFinite(epochMs) ? epochMs : undefined;
+}
+
+export function normalizeBrightSkyAlerts(
+  records: BrightSkyAlertRecord[],
+  language: AlertLanguage = 'en',
+): WeatherAlert[] {
+  const fallback: AlertLanguage = language === 'en' ? 'de' : 'en';
+  const text = (
+    record: BrightSkyAlertRecord,
+    field: 'headline' | 'event' | 'description' | 'instruction',
+  ) => record[`${field}_${language}`]?.trim() || record[`${field}_${fallback}`]?.trim() || undefined;
+
+  return records
+    .map((record, index): WeatherAlert => {
+      const normalizedSeverity = record.severity?.toLowerCase() ?? '';
+      const severity =
+        normalizedSeverity in SEVERITY_RANK
+          ? (normalizedSeverity as WeatherAlert['severity'])
+          : 'unknown';
+      return {
+        id: String(record.alert_id ?? record.id ?? `alert-${index}`),
+        headline: text(record, 'headline') ?? 'Official weather warning',
+        event: text(record, 'event'),
+        description: text(record, 'description'),
+        instruction: text(record, 'instruction'),
+        severity,
+        onsetEpochMs: parseEpochMs(record.onset),
+        expiresEpochMs: parseEpochMs(record.expires),
+        sourceUrl: DWD_WARNINGS_URL[language],
+      };
+    })
+    .sort(
+      (a, b) =>
+        SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity] ||
+        (a.onsetEpochMs ?? 0) - (b.onsetEpochMs ?? 0),
+    );
+}
 
 export interface BrightSkyRadarRecord {
   timestamp: string;
@@ -15,14 +71,21 @@ export interface BrightSkyRadarResponse {
   latlon_position?: { x: number; y: number } | null;
 }
 
-interface BrightSkyAlertRecord {
-  id?: string;
+type AlertLanguage = 'en' | 'de';
+
+// Bright Sky serves DWD warnings with English and German text side by side.
+type BrightSkyAlertRecord = {
+  id?: number | string;
   alert_id?: string;
-  headline?: string;
-  event?: string;
-  description?: string;
   severity?: string;
-}
+  onset?: string | null;
+  expires?: string | null;
+} & Partial<
+  Record<
+    `${'headline' | 'event' | 'description' | 'instruction'}_${AlertLanguage}`,
+    string | null
+  >
+>;
 
 interface BrightSkyAlertsResponse {
   alerts?: BrightSkyAlertRecord[];
@@ -74,21 +137,7 @@ export async function fetchBrightSkyAlerts(
 
   try {
     const data = await fetchJson<BrightSkyAlertsResponse>(url, signal);
-    return (data.alerts ?? []).slice(0, 3).map((alert, index) => {
-      const normalizedSeverity = alert.severity?.toLowerCase();
-      const severity = ['minor', 'moderate', 'severe', 'extreme'].includes(
-        normalizedSeverity ?? '',
-      )
-        ? (normalizedSeverity as WeatherAlert['severity'])
-        : 'unknown';
-
-      return {
-        id: alert.id ?? alert.alert_id ?? `alert-${index}`,
-        headline: alert.headline ?? alert.event ?? 'Official weather warning',
-        description: alert.description,
-        severity,
-      };
-    });
+    return normalizeBrightSkyAlerts(data.alerts ?? [], preferredAlertLanguage());
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') throw error;
     return [];

@@ -6,6 +6,7 @@ import type {
 } from '../weather/types';
 import { CrosshairIcon, PauseIcon, PlayIcon } from './Icons';
 import { TemperatureGauge } from './TemperatureGauge';
+import { WeatherAlertCallout } from './WeatherAlertCallout';
 import { Timeline } from './Timeline';
 
 interface WeatherPanelProps {
@@ -81,7 +82,13 @@ export function WeatherPanel({
         : 'BASE MAP';
 
   return (
-    <aside className="weather-panel" id="weather-panel" aria-live="polite">
+    <aside
+      className={`weather-panel${alerts.length > 0 ? ' has-alert' : ''}`}
+      id="weather-panel"
+      aria-live="polite"
+    >
+      <WeatherAlertCallout alerts={alerts} timezone={location.timezone} />
+
       <div className="panel-heading">
         <div>
           <span className="eyebrow">{location.name.toUpperCase()}</span>
@@ -92,13 +99,6 @@ export function WeatherPanel({
           <span>{formatUpdated(snapshot.updatedAt).toUpperCase()}</span>
         </div>
       </div>
-
-      {alerts.length > 0 ? (
-        <div className="alert-strip" role="alert">
-          <span>OFFICIAL WARNING</span>
-          <strong>{alerts[0].headline}</strong>
-        </div>
-      ) : null}
 
       <div className="status-controls">
         <div className="rain-status">
