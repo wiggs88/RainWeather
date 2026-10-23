@@ -113,6 +113,71 @@ a:focus-visible {
   image-rendering: auto;
 }
 
+/* The user's location: the pixel duck, which gets an umbrella and pixel rain
+   whenever the selected moment is wet. */
+.location-duck {
+  position: relative;
+  width: 21px;
+  height: 21px;
+  pointer-events: none;
+}
+
+.duck-sprite,
+.duck-umbrella {
+  position: absolute;
+  image-rendering: pixelated;
+  /* A 1px light rim keeps the dark outline readable on the dark map. */
+  filter: drop-shadow(1px 0 0 rgb(242 245 247 / 0.5)) drop-shadow(-1px 0 0 rgb(242 245 247 / 0.5))
+    drop-shadow(0 1px 0 rgb(242 245 247 / 0.5)) drop-shadow(0 -1px 0 rgb(242 245 247 / 0.5));
+}
+
+.duck-sprite {
+  inset: 0;
+}
+
+.duck-umbrella {
+  top: -15px;
+  left: -3px;
+}
+
+.duck-drop {
+  position: absolute;
+  top: 0;
+  left: var(--x);
+  width: 1px;
+  height: 3px;
+  background: var(--light-rain);
+  opacity: 0;
+  animation: duck-rain 0.9s steps(16) var(--delay) infinite;
+}
+
+.duck-drop.is-short {
+  animation-name: duck-rain-short;
+  animation-timing-function: steps(5);
+}
+
+@keyframes duck-rain {
+  0% {
+    opacity: 0.9;
+    transform: translateY(-26px);
+  }
+  100% {
+    opacity: 0.9;
+    transform: translateY(22px);
+  }
+}
+
+@keyframes duck-rain-short {
+  0% {
+    opacity: 0.9;
+    transform: translateY(-28px);
+  }
+  100% {
+    opacity: 0.9;
+    transform: translateY(-18px);
+  }
+}
+
 .location-shell {
   position: fixed;
   z-index: 30;
@@ -1225,4 +1290,13 @@ a:focus-visible {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .duck-drop {
+    opacity: 0.9;
+    transform: translateY(var(--rest, 4px));
+    animation: none !important;
+  }
+
 }
