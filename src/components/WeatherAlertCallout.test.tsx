@@ -26,15 +26,16 @@ describe('WeatherAlertCallout', () => {
     render(<WeatherAlertCallout alerts={[alert]} timezone="Europe/Berlin" />);
 
     const bubble = screen.getByRole('button', { name: /^Moderate warning: Gale-force gusts, until .*Show details$/ });
-    expect(screen.queryByText(/level 2 of 4/)).not.toBeVisible();
+    expect(screen.queryByText(/Level 2 of 4/)).not.toBeVisible();
 
     fireEvent.click(bubble);
 
-    expect(screen.getByText(/level 2 of 4/)).toBeVisible();
-    expect(screen.getByText('Secure free-standing objects.')).toBeVisible();
+    expect(screen.getByRole('heading', { name: 'Weather warning' })).toBeVisible();
+    expect(screen.getByText(/Level 2 of 4/)).toBeVisible();
+    expect(screen.getByText('Secure free-standing objects')).toBeVisible();
     expect(screen.getByRole('link', { name: /DWD/ })).toHaveAttribute('href', alert.sourceUrl);
 
-    fireEvent.click(screen.getByRole('button', { name: 'CLOSE' }));
-    expect(screen.queryByText(/level 2 of 4/)).not.toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    expect(screen.queryByText(/Level 2 of 4/)).not.toBeVisible();
   });
 });

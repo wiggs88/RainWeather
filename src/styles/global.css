@@ -453,56 +453,185 @@ a:focus-visible {
 
 .alert-dialog-body {
   display: grid;
-  gap: 14px;
-  padding: 14px;
+  gap: 10px;
+  padding: 16px;
 }
 
 .alert-dialog-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
+  margin-bottom: 4px;
 }
 
-.alert-detail {
-  padding-left: 12px;
-  border-left: 3px solid var(--warning);
+.alert-dialog-duck {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  image-rendering: pixelated;
 }
 
-.alert-detail.severity-severe,
-.alert-detail.severity-extreme {
-  border-left-color: #c10000;
+.alert-dialog-heading {
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
-.alert-detail h2 {
+.alert-dialog-heading h2 {
   margin: 0;
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 1.2;
 }
 
-.alert-detail p {
-  margin: 6px 0 0;
+.alert-dialog-heading p {
+  margin: 3px 0 0;
   color: var(--muted);
   font-size: 11px;
-  line-height: 1.5;
-  white-space: pre-line;
 }
 
-.alert-detail .alert-detail-meta {
-  margin-top: 4px;
-  color: var(--warning);
-  font-size: 10px;
-  letter-spacing: 0.06em;
+.alert-dialog-close {
+  margin: -6px -8px 0 0;
+  align-self: flex-start;
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
 }
 
-.alert-detail .alert-instruction {
+.alert-dialog-close:hover:not(:disabled),
+.alert-dialog-close:focus-visible {
   color: var(--text);
 }
 
-.alert-source {
-  color: var(--light-rain);
+.alert-detail {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--surface-raised);
+}
+
+.alert-detail summary {
+  display: grid;
+  cursor: pointer;
+  list-style: none;
+}
+
+.alert-detail summary::-webkit-details-marker {
+  display: none;
+}
+
+.alert-detail summary:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--focus);
+  outline-offset: 4px;
+}
+
+.alert-detail-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.alert-detail-name {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.alert-severity {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+.alert-severity::after {
+  color: var(--faint);
+  font-size: 13px;
+  content: '▾';
+  transition: transform 180ms ease-out;
+}
+
+.alert-detail:not([open]) .alert-severity::after {
+  transform: rotate(-90deg);
+}
+
+.alert-severity::before {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--warning);
+  content: '';
+}
+
+/* Severity dots use the radar palette's yellow, orange and red. */
+.alert-severity.severity-minor::before {
+  background: #ffee00;
+}
+
+.alert-severity.severity-moderate::before {
+  background: #ff9500;
+}
+
+.alert-severity.severity-severe::before,
+.alert-severity.severity-extreme::before {
+  background: #e02424;
+}
+
+.alert-detail-meta {
+  margin-top: 3px;
+  color: var(--muted);
   font-size: 11px;
-  letter-spacing: 0.05em;
+}
+
+.alert-facts {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.alert-facts div {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.alert-facts dt {
+  color: var(--faint);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.alert-facts dd {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.alert-note {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.alert-source {
+  justify-self: start;
+  padding: 4px 0;
+  color: var(--muted);
+  font-size: 11px;
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 3px;
+}
+
+.alert-source:hover,
+.alert-source:focus-visible {
+  color: var(--light-rain);
 }
 
 .rain-status {

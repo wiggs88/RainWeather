@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
+import { summarizeAlertText } from '../weather/alertText';
 import { formatClockTime } from '../weather/format';
 import type { WeatherAlert } from '../weather/types';
+import { CloseIcon } from './Icons';
 
 interface WeatherAlertCalloutProps {
   alerts: WeatherAlert[];
@@ -109,28 +111,66 @@ export function WeatherAlertCallout({ alerts, timezone }: WeatherAlertCalloutPro
       >
         <div className="alert-dialog-body">
           <header className="alert-dialog-header">
-            <span className="eyebrow" id={DIALOG_TITLE_ID}>
-              OFFICIAL WARNING{alerts.length > 1 ? `S (${alerts.length})` : ''}
-            </span>
+            <img
+              className="alert-dialog-duck"
+              src={`${import.meta.env.BASE_URL}duck.png`}
+              alt=""
+              width={42}
+              height={42}
+            />
+            <div className="alert-dialog-heading">
+              <h2 id={DIALOG_TITLE_ID}>
+                {alerts.length > 1 ? `${alerts.length} weather warnings` : 'Weather warning'}
+              </h2>
+              <p>Official, from the DWD</p>
+            </div>
             <button
-              className="text-button alert-dialog-close"
+              className="icon-button alert-dialog-close"
               type="button"
+              aria-label="Close"
               onClick={() => setIsOpen(false)}
             >
-              CLOSE
+              <CloseIcon />
             </button>
           </header>
-          {alerts.map((alert) => (
-            <article key={alert.id} className={`alert-detail severity-${alert.severity}`}>
-              <h2>{alertTitle(alert)}</h2>
-              <p className="alert-detail-meta">
-                {alert.severity === 'unknown' ? '' : `${alert.severity.toUpperCase()} · `}
-                {alertTiming(alert, timezone).toUpperCase()}
-              </p>
-              {alert.description ? <p>{alert.description}</p> : null}
-              {alert.instruction ? <p className="alert-instruction">{alert.instruction}</p> : null}
-            </article>
-          ))}
+          {alerts.map((alert, index) => {
+            const { level, facts, notes } = summarizeAlertText(alert.description, alert.instruction);
+            const timing = alertTiming(alert, timezone);
+            return (
+              // Only the most severe warning starts expanded; the rest are one line each.
+              <details key={alert.id} className="alert-detail" open={index === 0}>
+                <summary>
+                  <span className="alert-detail-title">
+                    <strong className="alert-detail-name">{alertTitle(alert)}</strong>
+                    {alert.severity === 'unknown' ? null : (
+                      <span className={`alert-severity severity-${alert.severity}`}>
+                        {capitalize(alert.severity)}
+                      </span>
+                    )}
+                  </span>
+                  <span className="alert-detail-meta">
+                    {timing.charAt(0).toUpperCase() + timing.slice(1)}
+                    {level ? ` · ${level}` : ''}
+                  </span>
+                </summary>
+                {facts.length > 0 ? (
+                  <dl className="alert-facts">
+                    {facts.map((fact) => (
+                      <div key={fact.label}>
+                        <dt>{fact.label}</dt>
+                        <dd>{fact.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                ) : null}
+                {notes.map((note) => (
+                  <p key={note} className="alert-note">
+                    {note}
+                  </p>
+                ))}
+              </details>
+            );
+          })}
           {primary.sourceUrl ? (
             <a
               className="alert-source"
@@ -138,7 +178,7 @@ export function WeatherAlertCallout({ alerts, timezone }: WeatherAlertCalloutPro
               target="_blank"
               rel="noopener noreferrer"
             >
-              FULL WARNING MAP AT DWD ↗
+              Full warning map at DWD ↗
             </a>
           ) : null}
         </div>

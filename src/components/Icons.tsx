@@ -57,3 +57,11 @@ export function CrosshairIcon(props: IconProps) {
     </svg>
   );
 }
+
+export function CloseIcon(props: IconProps) {
+  return (
+    <svg {...common} {...props}>
+      <path d="m6 6 12 12M18 6 6 18" />
+    </svg>
+  );
+}
