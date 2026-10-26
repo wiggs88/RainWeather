@@ -1110,6 +1110,12 @@ a:focus-visible {
   image-rendering: pixelated;
 }
 
+/* Half size in the panel row (one sprite pixel per device pixel on 2x screens). */
+.support-button.is-panel img {
+  width: 17px;
+  height: 17.5px;
+}
+
 /* ~44px touch target around the small cup. */
 .support-button.is-panel::after {
   position: absolute;
@@ -1150,7 +1156,7 @@ a:focus-visible {
 
   .support-button.is-corner img {
     width: 34px;
-    height: 32px;
+    height: 35px;
   }
 
   .support-button.is-corner:hover {
@@ -1166,38 +1172,32 @@ a:focus-visible {
 .support-dialog-body {
   position: relative;
   display: grid;
-  gap: 10px;
+  gap: 18px;
   justify-items: center;
-  padding: 28px 24px 24px;
+  padding: 36px 28px 24px;
   text-align: center;
 }
 
 .support-dialog-close {
   position: absolute;
-  top: 6px;
-  right: 6px;
+  top: 4px;
+  right: 4px;
   margin: 0;
-}
-
-.support-dialog h2 {
-  margin: 0 0 4px;
-  font-size: 18px;
-  font-weight: 650;
 }
 
 .support-dialog p {
+  max-width: 34ch;
   margin: 0;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.55;
+  font-size: 13px;
+  line-height: 1.65;
+  text-wrap: pretty;
 }
 
 .support-cup {
   display: inline-grid;
   justify-items: center;
-  gap: 8px;
-  margin-top: 10px;
-  padding: 12px 16px;
+  gap: 10px;
+  padding: 12px 18px;
   border-radius: 10px;
   color: var(--text);
   font-size: 11px;

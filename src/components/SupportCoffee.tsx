@@ -12,7 +12,6 @@ const COFFEE_SRC = `${import.meta.env.BASE_URL}coffee.png`;
 export function SupportCoffee({ placement }: SupportCoffeeProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const titleId = `support-title-${placement}`;
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -38,13 +37,13 @@ export function SupportCoffee({ placement }: SupportCoffeeProps) {
         aria-label="Support HOWDRY?!"
         onClick={() => setIsOpen(true)}
       >
-        <img src={COFFEE_SRC} alt="" width={17} height={16} />
+        <img src={COFFEE_SRC} alt="" width={34} height={35} />
       </button>
 
       <dialog
         ref={dialogRef}
         className="alert-dialog support-dialog"
-        aria-labelledby={titleId}
+        aria-label="Support HOWDRY?!"
         tabIndex={-1}
         onClose={() => setIsOpen(false)}
         onClick={(event) => {
@@ -60,18 +59,19 @@ export function SupportCoffee({ placement }: SupportCoffeeProps) {
           >
             <CloseIcon />
           </button>
-          <h2 id={titleId}>Free, forever.</h2>
-          <p>This rain radar is completely free and will always be free.</p>
-          <p>I don't want your data, I just want you to stay dry.</p>
-          <p>But I do like coffee. If you want to buy me one, press the coffee.</p>
+          <p>
+            This rain radar is completely free and will always be free. I don't want your data,
+            I just want you to stay dry. But I do like coffee. If you want to buy me a coffee,
+            press that coffee.
+          </p>
           {SUPPORT_URL ? (
             <a className="support-cup" href={SUPPORT_URL} target="_blank" rel="noopener noreferrer">
-              <img src={COFFEE_SRC} alt="" width={68} height={64} />
+              <img src={COFFEE_SRC} alt="" width={68} height={70} />
               <span>Buy me a coffee ↗</span>
             </a>
           ) : (
             <span className="support-cup is-pending">
-              <img src={COFFEE_SRC} alt="" width={68} height={64} />
+              <img src={COFFEE_SRC} alt="" width={68} height={70} />
               <span>Coffee button coming soon</span>
             </span>
           )}

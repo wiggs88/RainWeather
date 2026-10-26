@@ -11,7 +11,7 @@ describe('SupportCoffee', () => {
     expect(screen.queryByText(/always be free/)).not.toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'Support HOWDRY?!' }));
 
-    expect(screen.getByRole('heading', { name: 'Free, forever.' })).toBeVisible();
+    expect(screen.getByRole('dialog')).toBeVisible();
     expect(screen.getByText(/I just want you to stay dry/)).toBeVisible();
     // No payment link is configured yet.
     expect(screen.getByText('Coffee button coming soon')).toBeVisible();
