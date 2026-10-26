@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { SUPPORT_ENABLED, SUPPORT_URL } from '../app/support';
+import { SUPPORT_URL } from '../app/support';
 import { CloseIcon } from './Icons';
 
 interface SupportCoffeeProps {
@@ -25,8 +25,6 @@ export function SupportCoffee({ placement }: SupportCoffeeProps) {
       dialog.removeAttribute('open');
     }
   }, [isOpen]);
-
-  if (!SUPPORT_ENABLED) return null;
 
   return (
     <>
