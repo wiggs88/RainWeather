@@ -64,8 +64,8 @@ export function SupportCoffee({ placement }: SupportCoffeeProps) {
               className="support-duck"
               src={`${import.meta.env.BASE_URL}duck.png`}
               alt=""
-              width={42}
-              height={42}
+              width={21}
+              height={21}
             />
             <h2 id="support-hi" className="support-hi">
               HI

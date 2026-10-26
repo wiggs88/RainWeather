@@ -1168,8 +1168,9 @@ a:focus-visible {
 /* Continuous squash and stretch, anchored at his feet. */
 .support-duck {
   position: absolute;
-  right: calc(100% + 12px);
-  bottom: 0;
+  right: calc(100% + 10px);
+  /* Feet on the letters' baseline, not the line box bottom. */
+  bottom: 2px;
   image-rendering: pixelated;
   transform-origin: 50% 100%;
   animation: support-duck-bounce 0.5s ease-in-out infinite alternate;
