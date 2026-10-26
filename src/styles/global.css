@@ -1216,6 +1216,7 @@ a:focus-visible {
 
 .support-cup {
   display: inline-grid;
+  justify-self: center;
   justify-items: center;
   gap: 10px;
   padding: 12px 18px;
@@ -1241,6 +1242,11 @@ a.support-cup:focus-visible {
 
 .support-cup.is-pending {
   color: var(--faint);
+}
+
+/* Cancel the trailing letter-spacing so the caption centres under the cup. */
+.support-cup > span {
+  margin-right: -0.05em;
 }
 
 .support-cup.is-pending img {
