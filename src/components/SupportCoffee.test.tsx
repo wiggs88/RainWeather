@@ -13,8 +13,10 @@ describe('SupportCoffee', () => {
 
     expect(screen.getByRole('dialog')).toBeVisible();
     expect(screen.getByText(/I just want you to stay dry/)).toBeVisible();
-    // No payment link is configured yet.
-    expect(screen.getByText('Coffee button coming soon')).toBeVisible();
+    expect(screen.getByRole('link', { name: /Buy me a coffee/ })).toHaveAttribute(
+      'href',
+      expect.stringMatching(/^https:\/\/buy\.stripe\.com\//),
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'Close' }));
     expect(screen.queryByText(/always be free/)).not.toBeVisible();
