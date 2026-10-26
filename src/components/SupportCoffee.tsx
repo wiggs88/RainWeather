@@ -59,7 +59,18 @@ export function SupportCoffee({ placement }: SupportCoffeeProps) {
           >
             <CloseIcon />
           </button>
-          <h2 id="support-hi" className="support-hi">HI</h2>
+          <div className="support-greeting">
+            <img
+              className="support-duck"
+              src={`${import.meta.env.BASE_URL}duck.png`}
+              alt=""
+              width={42}
+              height={42}
+            />
+            <h2 id="support-hi" className="support-hi">
+              HI
+            </h2>
+          </div>
           <div className="support-text">
             <p>This rain radar is completely free and will always be free.</p>
             <p>I don't want your data, I just want you to stay dry.</p>
