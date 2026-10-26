@@ -43,7 +43,7 @@ export function SupportCoffee({ placement }: SupportCoffeeProps) {
       <dialog
         ref={dialogRef}
         className="alert-dialog support-dialog"
-        aria-label="Support HOWDRY?!"
+        aria-labelledby="support-hi"
         tabIndex={-1}
         onClose={() => setIsOpen(false)}
         onClick={(event) => {
@@ -59,11 +59,12 @@ export function SupportCoffee({ placement }: SupportCoffeeProps) {
           >
             <CloseIcon />
           </button>
-          <p>
-            This rain radar is completely free and will always be free. I don't want your data,
-            I just want you to stay dry. But I do like coffee. If you want to buy me a coffee,
-            press that coffee.
-          </p>
+          <h2 id="support-hi" className="support-hi">HI</h2>
+          <div className="support-text">
+            <p>This rain radar is completely free and will always be free.</p>
+            <p>I don't want your data, I just want you to stay dry.</p>
+            <p>But I do like coffee. If you want to buy me a coffee, press that coffee.</p>
+          </div>
           {SUPPORT_URL ? (
             <a className="support-cup" href={SUPPORT_URL} target="_blank" rel="noopener noreferrer">
               <img src={COFFEE_SRC} alt="" width={68} height={70} />

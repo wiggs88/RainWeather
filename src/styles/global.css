@@ -1172,9 +1172,9 @@ a:focus-visible {
 .support-dialog-body {
   position: relative;
   display: grid;
-  gap: 18px;
+  gap: 28px;
   justify-items: center;
-  padding: 36px 28px 24px;
+  padding: 44px 32px 28px;
   text-align: center;
 }
 
@@ -1185,12 +1185,25 @@ a:focus-visible {
   margin: 0;
 }
 
+.support-hi {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  line-height: 1;
+}
+
+.support-text {
+  display: grid;
+  gap: 14px;
+  max-width: 30ch;
+}
+
 .support-dialog p {
-  max-width: 34ch;
   margin: 0;
   font-size: 13px;
-  line-height: 1.65;
-  text-wrap: pretty;
+  line-height: 1.6;
+  text-wrap: balance;
 }
 
 .support-cup {
