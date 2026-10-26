@@ -702,35 +702,10 @@ a:focus-visible {
   text-transform: uppercase;
 }
 
-.alert-section p,
-.alert-section li {
+.alert-section p {
   margin: 0;
   font-size: 12px;
   line-height: 1.5;
-}
-
-.alert-section ul {
-  display: grid;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-/* Pixel-square bullets to match the duck. */
-.alert-section li {
-  position: relative;
-  padding-left: 14px;
-}
-
-.alert-section li::before {
-  position: absolute;
-  top: 0.6em;
-  left: 2px;
-  width: 4px;
-  height: 4px;
-  background: var(--warning);
-  content: '';
 }
 
 .alert-note {

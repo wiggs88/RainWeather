@@ -138,7 +138,7 @@ export function WeatherAlertCallout({ alerts, timezone }: WeatherAlertCalloutPro
             </button>
           </header>
           {alerts.map((alert, index) => {
-            const { level, facts, hazards, advice, notes } = summarizeAlertText(alert.description, alert.instruction);
+            const { level, facts, hazards, notes } = summarizeAlertText(alert.description, alert.instruction);
             const timing = alertTiming(alert, timezone);
             return (
               // Only the most severe warning starts expanded; the rest are one line each.
@@ -172,16 +172,6 @@ export function WeatherAlertCallout({ alerts, timezone }: WeatherAlertCalloutPro
                     <section className="alert-section">
                       <h3>Hazards</h3>
                       <p>{hazards}</p>
-                    </section>
-                  ) : null}
-                  {advice.length > 0 ? (
-                    <section className="alert-section">
-                      <h3>What to do</h3>
-                      <ul>
-                        {advice.map((item) => (
-                          <li key={item}>{item}</li>
-                        ))}
-                      </ul>
                     </section>
                   ) : null}
                   {notes.map((note) => (

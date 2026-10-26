@@ -10,7 +10,8 @@ const alert: WeatherAlert = {
   headline: 'Official WARNING of GALE-FORCE GUSTS',
   event: 'gale-force gusts',
   description: 'There is a risk of gale-force gusts (level 2 of 4).',
-  instruction: 'Secure free-standing objects.',
+  instruction:
+    'Hazard(s) caused by: falling branches. Recommendations for what to do: Secure free-standing objects.',
   severity: 'moderate',
   expiresEpochMs: Date.now() + 60 * 60_000,
   sourceUrl: 'https://www.dwd.de/EN/weather/warnings/warnings_node.html',
@@ -32,7 +33,8 @@ describe('WeatherAlertCallout', () => {
 
     expect(screen.getByRole('heading', { name: 'Weather warning' })).toBeVisible();
     expect(screen.getByText(/Level 2 of 4/)).toBeVisible();
-    expect(screen.getByText('Secure free-standing objects')).toBeVisible();
+    expect(screen.getByText('Falling branches')).toBeVisible();
+    expect(screen.queryByText(/Secure free-standing/)).toBeNull();
     expect(screen.getByRole('link', { name: /DWD/ })).toHaveAttribute('href', alert.sourceUrl);
 
     fireEvent.click(screen.getByRole('button', { name: 'Close' }));

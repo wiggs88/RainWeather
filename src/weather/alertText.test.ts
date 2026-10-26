@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { summarizeAlertText } from './alertText';
 
 describe('summarizeAlertText', () => {
-  it('turns DWD English text into a level, facts, hazards and advice', () => {
+  it('turns DWD English text into a level, facts and hazards, dropping advice', () => {
     const summary = summarizeAlertText(
       'There is a risk of gale-force gusts (level 2 of 4).\nMax. gusts: 60-75 km/h; Wind direction: south then south-west',
       'Hazard(s) caused by: single branches falling; objects flying through the air. \nRecommendations for what to do: \nSecure free-standing objects (e.g. screens and furniture). Watch out for falling objects outdoors.',
@@ -15,10 +15,6 @@ describe('summarizeAlertText', () => {
         { label: 'Wind direction', value: 'south then south-west' },
       ],
       hazards: 'Single branches falling; objects flying through the air',
-      advice: [
-        'Secure free-standing objects (e.g. screens and furniture)',
-        'Watch out for falling objects outdoors',
-      ],
       notes: [],
     });
   });
@@ -37,17 +33,13 @@ describe('summarizeAlertText', () => {
     expect(summary.hazards).toBe(
       'Flooding of roads, subways and buildings near water bodies; possible mudslides',
     );
-    expect(summary.advice).toEqual([
-      'Avoid flooded areas and areas at risk',
-      'Keep up to date at www.hochwasserzentralen.de',
-    ]);
   });
 
-  it('keeps prose it cannot label', () => {
+  it('keeps description prose it cannot label and skips unlabelled advice', () => {
     const summary = summarizeAlertText('Es treten Sturmböen auf.', 'Gegenstände sichern.');
 
     expect(summary.level).toBeUndefined();
     expect(summary.notes).toEqual(['Es treten Sturmböen auf.']);
-    expect(summary.advice).toEqual(['Gegenstände sichern']);
+    expect(summary.hazards).toBeUndefined();
   });
 });

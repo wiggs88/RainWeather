@@ -10,8 +10,6 @@ export interface AlertSummary {
   facts: AlertFact[];
   /** What the weather may cause. */
   hazards?: string;
-  /** What to do, one sentence per item. */
-  advice: string[];
   /** Free text that didn't fit the shapes above (e.g. German prose). */
   notes: string[];
 }
@@ -48,27 +46,20 @@ function splitDescription(description: string, summary: AlertSummary) {
   }
 }
 
-function sentences(text: string): string[] {
-  // Split after a full stop followed by a capital, keeping "e.g. screens" intact.
-  return text
-    .split(/(?<=[.!])\s+(?=[A-ZÄÖÜ])/)
-    .map((sentence) => sentence.replace(/[.;]\s*$/, ''))
-    .filter(Boolean);
-}
-
+// Only the hazards are kept; the "what to do" advice after them is dropped.
 function splitInstruction(instruction: string, summary: AlertSummary) {
   const text = clean(instruction);
   const advice = text.match(ADVICE_LABEL);
-  const hazardText = advice ? text.slice(0, advice.index) : '';
-  const adviceText = advice ? text.slice(advice.index! + advice[0].length) : text;
+  const hazardText = advice ? text.slice(0, advice.index) : text;
+  // Without an advice label, unlabelled text is advice rather than hazards.
+  if (!LEADING_LABEL.test(hazardText)) return;
 
   const hazards = clean(hazardText.replace(LEADING_LABEL, '')).replace(/[.;]\s*$/, '');
   if (hazards) summary.hazards = capitalize(hazards);
-  summary.advice.push(...sentences(clean(adviceText)));
 }
 
 export function summarizeAlertText(description?: string, instruction?: string): AlertSummary {
-  const summary: AlertSummary = { facts: [], advice: [], notes: [] };
+  const summary: AlertSummary = { facts: [], notes: [] };
   if (description) splitDescription(description, summary);
   if (instruction) splitInstruction(instruction, summary);
   return summary;
