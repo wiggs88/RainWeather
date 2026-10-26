@@ -512,6 +512,10 @@ a:focus-visible {
   color: var(--text);
 }
 
+.alert-dialog:focus {
+  outline: none;
+}
+
 .alert-dialog::backdrop {
   background: rgb(0 0 0 / 0.6);
 }
@@ -651,34 +655,86 @@ a:focus-visible {
   font-size: 11px;
 }
 
+.alert-detail-body {
+  display: grid;
+  gap: 14px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+/* Measured values as small tiles: label on top, value below. */
 .alert-facts {
   display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 6px;
-  margin: 10px 0 0;
-  padding-top: 10px;
-  border-top: 1px solid var(--border);
+  margin: 0;
 }
 
 .alert-facts div {
   display: grid;
-  grid-template-columns: 90px minmax(0, 1fr);
-  gap: 10px;
+  align-content: start;
+  gap: 3px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--surface);
 }
 
 .alert-facts dt {
-  color: var(--faint);
+  color: var(--muted);
   font-size: 10px;
-  line-height: 1.6;
+  line-height: 1.3;
 }
 
 .alert-facts dd {
   margin: 0;
-  font-size: 11px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.alert-section h3 {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.alert-section p,
+.alert-section li {
+  margin: 0;
+  font-size: 12px;
   line-height: 1.5;
 }
 
+.alert-section ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Pixel-square bullets to match the duck. */
+.alert-section li {
+  position: relative;
+  padding-left: 14px;
+}
+
+.alert-section li::before {
+  position: absolute;
+  top: 0.6em;
+  left: 2px;
+  width: 4px;
+  height: 4px;
+  background: var(--warning);
+  content: '';
+}
+
 .alert-note {
-  margin: 8px 0 0;
+  margin: 0;
   color: var(--muted);
   font-size: 11px;
   line-height: 1.5;
@@ -1025,6 +1081,151 @@ a:focus-visible {
   line-height: 1.4;
 }
 
+/* Attribution line with the coffee cup at its end (phones). */
+.panel-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.panel-meta .attribution {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.support-button {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: 0;
+  background: transparent;
+}
+
+.support-button img {
+  display: block;
+  image-rendering: pixelated;
+}
+
+/* ~44px touch target around the small cup. */
+.support-button.is-panel::after {
+  position: absolute;
+  inset: -12px -12px -10px;
+  content: '';
+}
+
+.support-button.is-corner {
+  display: none;
+}
+
+.support-button:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (min-width: 720px) {
+  .support-button.is-panel {
+    display: none;
+  }
+
+  .support-button.is-corner {
+    position: fixed;
+    z-index: 25;
+    right: 16px;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    display: inline-flex;
+    width: 52px;
+    height: 52px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    transition:
+      border-color 180ms ease-out,
+      transform 180ms ease-out;
+  }
+
+  .support-button.is-corner img {
+    width: 34px;
+    height: 32px;
+  }
+
+  .support-button.is-corner:hover {
+    border-color: var(--muted);
+    transform: translateY(-2px);
+  }
+}
+
+.support-dialog {
+  width: min(360px, calc(100vw - 24px));
+}
+
+.support-dialog-body {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  padding: 28px 24px 24px;
+  text-align: center;
+}
+
+.support-dialog-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  margin: 0;
+}
+
+.support-dialog h2 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 650;
+}
+
+.support-dialog p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.support-cup {
+  display: inline-grid;
+  justify-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  transition:
+    background-color 180ms ease-out,
+    transform 180ms ease-out;
+}
+
+.support-cup img {
+  image-rendering: pixelated;
+}
+
+a.support-cup:hover,
+a.support-cup:focus-visible {
+  background: var(--surface-raised);
+  transform: translateY(-2px);
+}
+
+.support-cup.is-pending {
+  color: var(--faint);
+}
+
+.support-cup.is-pending img {
+  opacity: 0.6;
+}
+
 .loading-panel {
   display: flex;
   min-height: 220px;
@@ -1265,7 +1466,7 @@ a:focus-visible {
 
 @media (max-height: 700px) and (max-width: 719px) {
   .attribution {
-    display: none;
+    visibility: hidden;
   }
 
   .rain-status h1 {
