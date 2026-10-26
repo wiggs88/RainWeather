@@ -51,9 +51,15 @@ export function LocationDuck({ intensity = 'dry' }: LocationDuckProps) {
         />
       ))}
       {drops.length > 0 ? (
-        <img className="duck-umbrella" src={`${base}umbrella.png`} alt="" width={21} height={20} />
+        <img
+          className="duck-umbrella"
+          src={`${base}umbrella-marker.png`}
+          alt=""
+          width={23}
+          height={22}
+        />
       ) : null}
-      <img className="duck-sprite" src={`${base}duck.png`} alt="" width={21} height={21} />
+      <img className="duck-sprite" src={`${base}duck-marker.png`} alt="" width={23} height={23} />
     </div>
   );
 }

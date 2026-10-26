@@ -10,7 +10,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'duck.png', 'umbrella.png'],
+      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'duck.png', 'duck-marker.png', 'umbrella-marker.png'],
       manifest: {
         name: 'HOWDRY?!',
         short_name: 'HOWDRY?!',
