@@ -1,4 +1,5 @@
 import { apply } from 'ol-mapbox-style';
+import Collection from 'ol/Collection';
 import Map from 'ol/Map';
 import Overlay from 'ol/Overlay';
 import View from 'ol/View';
@@ -66,7 +67,10 @@ export function RadarMap({
   locationRef.current = location;
   const mapRef = useRef<Map | undefined>(undefined);
   const radarLayerRef = useRef(new ImageLayer({ opacity: 0.82 }));
-  const fallbackLayerRef = useRef(new TileLayer({ visible: false, opacity: 0.72 }));
+  // One preloaded layer per RainViewer frame: swapping a single layer's source
+  // on every timeline step made tiles blank out and reload, which flickered.
+  const fallbackGroupRef = useRef(new LayerGroup({ visible: false }));
+  const fallbackLayersRef = useRef(new globalThis.Map<string, TileLayer<XYZ>>());
   const [markerElement] = useState(() => document.createElement('div'));
   const markerRef = useRef<Overlay | undefined>(undefined);
 
@@ -85,7 +89,7 @@ export function RadarMap({
     const map = new Map({
       target: targetRef.current,
       controls: [],
-      layers: [baseGroup, fallbackLayerRef.current, radarLayerRef.current],
+      layers: [baseGroup, fallbackGroupRef.current, radarLayerRef.current],
       overlays: [marker],
       view: new View({
         center: fromLonLat([location.longitude, location.latitude]),
@@ -123,6 +127,28 @@ export function RadarMap({
   }, [location]);
 
   useEffect(() => {
+    const previous = fallbackLayersRef.current;
+    const next = new globalThis.Map<string, TileLayer<XYZ>>();
+    rainViewerFrames.forEach((frame) => {
+      next.set(
+        frame.id,
+        previous.get(frame.id) ??
+          new TileLayer({
+            opacity: 0,
+            source: new XYZ({
+              url: frame.tileTemplate,
+              maxZoom: 7,
+              crossOrigin: 'anonymous',
+              interpolate: false,
+            }),
+          }),
+      );
+    });
+    fallbackLayersRef.current = next;
+    fallbackGroupRef.current.setLayers(new Collection([...next.values()]));
+  }, [rainViewerFrames]);
+
+  useEffect(() => {
     const selectedFrame = selectedPoint?.mapFrameId
       ? radarFrames.find((frame) => frame.id === selectedPoint.mapFrameId)
       : undefined;
@@ -137,31 +163,22 @@ export function RadarMap({
         }),
       );
       radarLayerRef.current.setVisible(true);
-      fallbackLayerRef.current.setVisible(false);
+      fallbackGroupRef.current.setVisible(false);
       return;
     }
 
     radarLayerRef.current.setVisible(false);
     if (radarFrames.length > 0) {
-      fallbackLayerRef.current.setVisible(false);
+      fallbackGroupRef.current.setVisible(false);
       return;
     }
     const fallback = selectedPoint
       ? closestRainViewerFrame(rainViewerFrames, selectedPoint.epochMs)
       : rainViewerFrames.at(-1);
-    if (fallback) {
-      fallbackLayerRef.current.setSource(
-        new XYZ({
-          url: fallback.tileTemplate,
-          maxZoom: 7,
-          crossOrigin: 'anonymous',
-          interpolate: false,
-        }),
-      );
-      fallbackLayerRef.current.setVisible(true);
-    } else {
-      fallbackLayerRef.current.setVisible(false);
-    }
+    fallbackLayersRef.current.forEach((layer, id) =>
+      layer.setOpacity(id === fallback?.id ? 0.72 : 0),
+    );
+    fallbackGroupRef.current.setVisible(Boolean(fallback));
   }, [radarFrames, rainViewerFrames, selectedPoint]);
 
   return (

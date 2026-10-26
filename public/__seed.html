@@ -1,0 +1,5 @@
+<!doctype html><script>
+const p=new URLSearchParams(location.search);
+localStorage.setItem('rainweather.location.v1', JSON.stringify({id:p.get('id'),name:p.get('name'),detail:'',latitude:+p.get('lat'),longitude:+p.get('lon'),timezone:'Europe/Berlin'}));
+location.replace('/');
+</script>

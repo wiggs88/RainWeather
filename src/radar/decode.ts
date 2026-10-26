@@ -1,6 +1,7 @@
 import type { BrightSkyRadarResponse } from '../weather/brightSky';
 import { phaseForTimestamp, radarSampleToTimelinePoint } from '../weather/normalize';
 import type { RadarFrame, TimelinePoint } from '../weather/types';
+import { DWD_FADE_KM, DWD_RADAR_RANGE_KM, dwdSitesInBbox } from './coverage';
 import { radarExtentForBbox } from './dwdProjection';
 
 interface WorkerFrameMessage {
@@ -142,6 +143,9 @@ export async function decodeBrightSkyRadar(
       sampleX: samplePosition.x,
       sampleY: samplePosition.y,
       sampleRadius: 2,
+      sites: dwdSitesInBbox(response.bbox!),
+      rangePx: DWD_RADAR_RANGE_KM,
+      fadePx: DWD_FADE_KM,
       frames: response.radar.map((record, index) => ({
         id: `radar-${Date.parse(record.timestamp)}-${index}`,
         timestamp: record.timestamp,
