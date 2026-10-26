@@ -59,6 +59,9 @@ export function WeatherAlertCallout({ alerts, timezone }: WeatherAlertCalloutPro
     if (isOpen && !dialog.open) {
       if (typeof dialog.showModal === 'function') dialog.showModal();
       else dialog.setAttribute('open', '');
+      // Start focus on the dialog itself, not the close button, so no focus ring
+      // greets touch users; Tab still reaches the close button first.
+      dialog.focus();
     } else if (!isOpen && dialog.open) {
       dialog.close?.();
       dialog.removeAttribute('open');
@@ -103,6 +106,7 @@ export function WeatherAlertCallout({ alerts, timezone }: WeatherAlertCalloutPro
         ref={dialogRef}
         className="alert-dialog"
         aria-labelledby={DIALOG_TITLE_ID}
+        tabIndex={-1}
         onClose={() => setIsOpen(false)}
         onClick={(event) => {
           // Clicking the backdrop (the dialog element itself) closes it.
@@ -134,7 +138,7 @@ export function WeatherAlertCallout({ alerts, timezone }: WeatherAlertCalloutPro
             </button>
           </header>
           {alerts.map((alert, index) => {
-            const { level, facts, notes } = summarizeAlertText(alert.description, alert.instruction);
+            const { level, facts, hazards, notes } = summarizeAlertText(alert.description, alert.instruction);
             const timing = alertTiming(alert, timezone);
             return (
               // Only the most severe warning starts expanded; the rest are one line each.
@@ -153,21 +157,29 @@ export function WeatherAlertCallout({ alerts, timezone }: WeatherAlertCalloutPro
                     {level ? ` · ${level}` : ''}
                   </span>
                 </summary>
-                {facts.length > 0 ? (
-                  <dl className="alert-facts">
-                    {facts.map((fact) => (
-                      <div key={fact.label}>
-                        <dt>{fact.label}</dt>
-                        <dd>{fact.value}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                ) : null}
-                {notes.map((note) => (
-                  <p key={note} className="alert-note">
-                    {note}
-                  </p>
-                ))}
+                <div className="alert-detail-body">
+                  {facts.length > 0 ? (
+                    <dl className="alert-facts">
+                      {facts.map((fact) => (
+                        <div key={fact.label}>
+                          <dt>{fact.label}</dt>
+                          <dd>{fact.value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  ) : null}
+                  {hazards ? (
+                    <section className="alert-section">
+                      <h3>Hazards</h3>
+                      <p>{hazards}</p>
+                    </section>
+                  ) : null}
+                  {notes.map((note) => (
+                    <p key={note} className="alert-note">
+                      {note}
+                    </p>
+                  ))}
+                </div>
               </details>
             );
           })}

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { isWithinDwdCoverage } from '../radar/coverage';
 import { decodeBrightSkyRadar } from '../radar/decode';
 import { fetchBrightSkyAlerts, fetchBrightSkyRadar } from '../weather/brightSky';
 import { readCachedSnapshot, writeCachedSnapshot } from '../weather/cache';
@@ -55,9 +56,12 @@ export function useWeatherData(location: Location): WeatherDataState {
     setError(undefined);
 
     const forecastPromise = fetchForecast(location, controller.signal, nowMs);
-    const radarPromise = fetchBrightSkyRadar(location, controller.signal, nowMs).then(
-      (response) => decodeBrightSkyRadar(response, controller.signal, nowMs),
-    );
+    const inDwdCoverage = isWithinDwdCoverage(location.latitude, location.longitude);
+    const radarPromise = inDwdCoverage
+      ? fetchBrightSkyRadar(location, controller.signal, nowMs).then((response) =>
+          decodeBrightSkyRadar(response, controller.signal, nowMs),
+        )
+      : Promise.reject(new Error('Outside German radar coverage'));
     const rainViewerPromise = fetchRainViewerFrames(controller.signal);
     const alertsPromise = fetchBrightSkyAlerts(location, controller.signal);
 
@@ -109,7 +113,9 @@ export function useWeatherData(location: Location): WeatherDataState {
       if (!radar) {
         notices.push(
           rainViewer.length > 0
-            ? 'Local nowcast unavailable — using RainViewer radar history'
+            ? inDwdCoverage
+              ? 'Local nowcast unavailable — using RainViewer radar history'
+              : 'Outside German radar range — using European radar from RainViewer'
             : 'Local radar unavailable — showing forecast timeline',
         );
       }

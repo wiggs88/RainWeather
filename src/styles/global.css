@@ -126,18 +126,18 @@ a:focus-visible {
 .duck-umbrella {
   position: absolute;
   image-rendering: pixelated;
-  /* A 1px light rim keeps the dark outline readable on the dark map. */
-  filter: drop-shadow(1px 0 0 rgb(242 245 247 / 0.5)) drop-shadow(-1px 0 0 rgb(242 245 247 / 0.5))
-    drop-shadow(0 1px 0 rgb(242 245 247 / 0.5)) drop-shadow(0 -1px 0 rgb(242 245 247 / 0.5));
 }
 
+/* The marker sprites carry a baked-in 1px light rim (instead of a CSS filter,
+   which leaves paint trails on iOS while the map pans). */
 .duck-sprite {
-  inset: 0;
+  top: -1px;
+  left: -1px;
 }
 
 .duck-umbrella {
-  top: -15px;
-  left: -3px;
+  top: -16px;
+  left: -4px;
 }
 
 .duck-drop {
@@ -512,6 +512,10 @@ a:focus-visible {
   color: var(--text);
 }
 
+.alert-dialog:focus {
+  outline: none;
+}
+
 .alert-dialog::backdrop {
   background: rgb(0 0 0 / 0.6);
 }
@@ -651,34 +655,61 @@ a:focus-visible {
   font-size: 11px;
 }
 
+.alert-detail-body {
+  display: grid;
+  gap: 14px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+/* Measured values as small tiles: label on top, value below. */
 .alert-facts {
   display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 6px;
-  margin: 10px 0 0;
-  padding-top: 10px;
-  border-top: 1px solid var(--border);
+  margin: 0;
 }
 
 .alert-facts div {
   display: grid;
-  grid-template-columns: 90px minmax(0, 1fr);
-  gap: 10px;
+  align-content: start;
+  gap: 3px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--surface);
 }
 
 .alert-facts dt {
-  color: var(--faint);
+  color: var(--muted);
   font-size: 10px;
-  line-height: 1.6;
+  line-height: 1.3;
 }
 
 .alert-facts dd {
   margin: 0;
-  font-size: 11px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.alert-section h3 {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.alert-section p {
+  margin: 0;
+  font-size: 12px;
   line-height: 1.5;
 }
 
 .alert-note {
-  margin: 8px 0 0;
+  margin: 0;
   color: var(--muted);
   font-size: 11px;
   line-height: 1.5;
@@ -1025,6 +1056,203 @@ a:focus-visible {
   line-height: 1.4;
 }
 
+/* Attribution line with the coffee cup at its end (phones). */
+.panel-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.panel-meta .attribution {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.support-button {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: 0;
+  background: transparent;
+}
+
+.support-button img {
+  display: block;
+  image-rendering: pixelated;
+}
+
+/* Half size in the panel row (one sprite pixel per device pixel on 2x screens). */
+.support-button.is-panel img {
+  width: 17px;
+  height: 17.5px;
+}
+
+/* ~44px touch target around the small cup. */
+.support-button.is-panel::after {
+  position: absolute;
+  inset: -12px -12px -10px;
+  content: '';
+}
+
+.support-button.is-corner {
+  display: none;
+}
+
+.support-button:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (min-width: 720px) {
+  .support-button.is-panel {
+    display: none;
+  }
+
+  .support-button.is-corner {
+    position: fixed;
+    z-index: 25;
+    right: 16px;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    display: inline-flex;
+    width: 52px;
+    height: 52px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    transition:
+      border-color 180ms ease-out,
+      transform 180ms ease-out;
+  }
+
+  .support-button.is-corner img {
+    width: 34px;
+    height: 35px;
+  }
+
+  .support-button.is-corner:hover {
+    border-color: var(--muted);
+    transform: translateY(-2px);
+  }
+}
+
+.support-dialog {
+  width: min(360px, calc(100vw - 24px));
+}
+
+.support-dialog-body {
+  position: relative;
+  display: grid;
+  gap: 28px;
+  justify-items: center;
+  padding: 44px 32px 28px;
+  text-align: center;
+}
+
+.support-dialog-close {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  margin: 0;
+}
+
+/* HI stays centred; the duck hangs off its left edge. */
+.support-greeting {
+  position: relative;
+}
+
+/* Continuous squash and stretch, anchored at his feet. */
+.support-duck {
+  position: absolute;
+  right: calc(100% + 10px);
+  /* Feet on the letters' baseline, not the line box bottom. */
+  bottom: 2px;
+  image-rendering: pixelated;
+  transform-origin: 50% 100%;
+  animation: support-duck-bounce 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes support-duck-bounce {
+  from {
+    transform: scale(1.14, 0.86);
+  }
+  to {
+    transform: scale(0.9, 1.12);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .support-duck {
+    animation: none;
+  }
+}
+
+.support-hi {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  /* Cancel the trailing letter-spacing so the letters sit truly centred. */
+  margin-right: -0.12em;
+}
+
+.support-text {
+  display: grid;
+  gap: 14px;
+  max-width: 30ch;
+}
+
+.support-dialog p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  text-wrap: balance;
+}
+
+.support-cup {
+  display: inline-grid;
+  justify-self: center;
+  justify-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  transition:
+    background-color 180ms ease-out,
+    transform 180ms ease-out;
+}
+
+.support-cup img {
+  image-rendering: pixelated;
+}
+
+a.support-cup:hover,
+a.support-cup:focus-visible {
+  background: var(--surface-raised);
+  transform: translateY(-2px);
+}
+
+.support-cup.is-pending {
+  color: var(--faint);
+}
+
+/* Cancel the trailing letter-spacing so the caption centres under the cup. */
+.support-cup > span {
+  margin-right: -0.05em;
+}
+
+.support-cup.is-pending img {
+  opacity: 0.6;
+}
+
 .loading-panel {
   display: flex;
   min-height: 220px;
@@ -1265,7 +1493,7 @@ a:focus-visible {
 
 @media (max-height: 700px) and (max-width: 719px) {
   .attribution {
-    display: none;
+    visibility: hidden;
   }
 
   .rain-status h1 {

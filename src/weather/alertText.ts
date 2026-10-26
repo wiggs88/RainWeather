@@ -6,18 +6,26 @@ export interface AlertFact {
 export interface AlertSummary {
   /** Warning level from DWD's "(level 2 of 4)" phrasing, when present. */
   level?: string;
+  /** Measured or expected values, e.g. "Max. gusts: 60-75 km/h". */
   facts: AlertFact[];
-  /** Free text that didn't fit the label/value shape. */
+  /** What the weather may cause. */
+  hazards?: string;
+  /** Free text that didn't fit the shapes above (e.g. German prose). */
   notes: string[];
 }
 
 const LEVEL_SENTENCE = /^There is a risk of [^.]*\(level (\d) of (\d)\)\.?\s*/i;
 const LABELLED = /^([^:]{2,32}):\s*(.+)$/;
-const HAZARD_LABEL = /^(hazard\(s\)[^:]*|gefahr[^:]*):\s*/i;
-const ADVICE_LABEL = /^(recommendations for what to do|handlungsempfehlungen):\s*/i;
+const ADVICE_LABEL = /(recommendations for what to do|handlungsempfehlungen)\s*:/i;
+// "Hazard(s) caused by:", "Great danger due to:", "Gefahr durch:" …
+const LEADING_LABEL = /^[^:.]{2,40}:\s*/;
 
 function clean(text: string): string {
   return text.replace(/\s+/g, ' ').trim();
+}
+
+function capitalize(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
 function splitDescription(description: string, summary: AlertSummary) {
@@ -29,37 +37,25 @@ function splitDescription(description: string, summary: AlertSummary) {
     const parts = line.split(/;\s*/);
     const labelled = parts.map((part) => part.match(LABELLED));
     if (labelled.every(Boolean)) {
-      for (const found of labelled) summary.facts.push({ label: found![1], value: found![2] });
+      for (const found of labelled) {
+        summary.facts.push({ label: capitalize(found![1]), value: found![2] });
+      }
     } else {
       summary.notes.push(line);
     }
   }
 }
 
+// Only the hazards are kept; the "what to do" advice after them is dropped.
 function splitInstruction(instruction: string, summary: AlertSummary) {
-  // DWD instructions read "Hazard(s) …: x. Recommendations for what to do: y."
-  // across several lines; regroup them into two labelled facts.
-  const lines = instruction.split('\n').map(clean).filter(Boolean);
-  let current: AlertFact | undefined;
-  const facts: AlertFact[] = [];
-  for (const line of lines) {
-    const hazard = line.match(HAZARD_LABEL);
-    const advice = line.match(ADVICE_LABEL);
-    if (hazard || advice) {
-      current = { label: hazard ? 'Hazards' : 'What to do', value: '' };
-      facts.push(current);
-      const remainder = line.slice((hazard ?? advice)![0].length);
-      if (remainder) current.value = remainder;
-    } else if (current) {
-      current.value = clean(`${current.value} ${line}`);
-    } else {
-      facts.push((current = { label: 'What to do', value: line }));
-    }
-  }
-  for (const fact of facts) {
-    const value = fact.value.replace(/[.;]\s*$/, '');
-    if (value) summary.facts.push({ label: fact.label, value });
-  }
+  const text = clean(instruction);
+  const advice = text.match(ADVICE_LABEL);
+  const hazardText = advice ? text.slice(0, advice.index) : text;
+  // Without an advice label, unlabelled text is advice rather than hazards.
+  if (!LEADING_LABEL.test(hazardText)) return;
+
+  const hazards = clean(hazardText.replace(LEADING_LABEL, '')).replace(/[.;]\s*$/, '');
+  if (hazards) summary.hazards = capitalize(hazards);
 }
 
 export function summarizeAlertText(description?: string, instruction?: string): AlertSummary {
