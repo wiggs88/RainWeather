@@ -9,6 +9,7 @@ import {
 import { searchLocations } from '../weather/openMeteo';
 import type { Location } from '../weather/types';
 import { LocationIcon, SearchIcon } from './Icons';
+import { SupportCoffee } from './SupportCoffee';
 
 interface LocationSearchProps {
   location: Location;
@@ -215,6 +216,7 @@ export function LocationSearch({ location, onSelect }: LocationSearchProps) {
       >
         <LocationIcon />
       </button>
+      <SupportCoffee />
 
       {showResults ? (
         <div className="search-results" id={RESULTS_ID} role="listbox" aria-live="polite">

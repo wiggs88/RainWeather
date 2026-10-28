@@ -6,7 +6,6 @@ import type {
 } from '../weather/types';
 import { CrosshairIcon, PauseIcon, PlayIcon } from './Icons';
 import { TemperatureGauge } from './TemperatureGauge';
-import { SupportCoffee } from './SupportCoffee';
 import { WeatherAlertCallout } from './WeatherAlertCallout';
 import { Timeline } from './Timeline';
 
@@ -155,12 +154,9 @@ export function WeatherPanel({
         <span>{selected?.thunderRisk && selected.thunderRisk >= 0.25 ? 'THUNDER RISK' : 'PRECIPITATION'}</span>
         <span>{notices[0] ?? 'DWD / OPEN-METEO'}</span>
       </div>
-      <div className="panel-meta">
-        <p className="attribution">
-          © OpenFreeMap · © OpenStreetMap · Weather: DWD, Open-Meteo, RainViewer
-        </p>
-        <SupportCoffee placement="panel" />
-      </div>
+      <p className="attribution">
+        © OpenFreeMap · © OpenStreetMap · Weather: DWD, Open-Meteo, RainViewer
+      </p>
     </aside>
   );
 }
