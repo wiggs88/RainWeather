@@ -2,14 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { SUPPORT_URL } from '../app/support';
 import { CloseIcon } from './Icons';
 
-interface SupportCoffeeProps {
-  /** `panel` sits inside the weather panel on phones; `corner` floats bottom-right on desktop. */
-  placement: 'panel' | 'corner';
-}
-
 const COFFEE_SRC = `${import.meta.env.BASE_URL}coffee.png`;
 
-export function SupportCoffee({ placement }: SupportCoffeeProps) {
+export function SupportCoffee() {
   const [isOpen, setIsOpen] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -29,13 +24,13 @@ export function SupportCoffee({ placement }: SupportCoffeeProps) {
   return (
     <>
       <button
-        className={`support-button is-${placement}`}
+        className="icon-button support-button"
         type="button"
         aria-haspopup="dialog"
         aria-label="Support HOWDRY?!"
         onClick={() => setIsOpen(true)}
       >
-        <img src={COFFEE_SRC} alt="" width={34} height={35} />
+        <img src={COFFEE_SRC} alt="" width={17} height={17.5} />
       </button>
 
       <dialog

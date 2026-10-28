@@ -6,7 +6,7 @@ afterEach(cleanup);
 
 describe('SupportCoffee', () => {
   it('opens the free-forever note from the coffee cup', () => {
-    render(<SupportCoffee placement="corner" />);
+    render(<SupportCoffee />);
 
     expect(screen.queryByText(/always be free/)).not.toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'Support HOWDRY?!' }));

@@ -1,6 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { LocationSearch } from '../components/LocationSearch';
-import { SupportCoffee } from '../components/SupportCoffee';
 import { WeatherPanel } from '../components/WeatherPanel';
 import { usePlayback } from '../hooks/usePlayback';
 import { useWeatherData } from '../hooks/useWeatherData';
@@ -71,7 +70,6 @@ export function App() {
         playback={playback}
         onRefresh={weather.refresh}
       />
-      <SupportCoffee placement="corner" />
     </div>
   );
 }
