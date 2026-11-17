@@ -53,8 +53,9 @@ function sampleLocalRate(
 const BAYER_4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
 
 /**
- * Which pixels to draw: fully inside radar range and away from the crop edge,
- * dithered out across the last `fadePx`, and nothing beyond.
+ * Which pixels to draw: fully inside radar range and inside the circle that
+ * fits the crop, dithered out across the last `fadePx`, and nothing beyond.
+ * The crop is a square, so a circle keeps its corners from showing on wide screens.
  */
 function coverageMask(
   width: number,
@@ -64,6 +65,9 @@ function coverageMask(
   fadePx: number,
 ): Uint8Array {
   const mask = new Uint8Array(width * height);
+  const centerX = (width - 1) / 2;
+  const centerY = (height - 1) / 2;
+  const cropRadius = Math.min(centerX, centerY);
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {
       let nearest = Number.POSITIVE_INFINITY;
@@ -71,7 +75,7 @@ function coverageMask(
         const distance = Math.hypot(x - site.x, y - site.y);
         if (distance < nearest) nearest = distance;
       }
-      const edge = Math.min(x, y, width - 1 - x, height - 1 - y);
+      const edge = cropRadius - Math.hypot(x - centerX, y - centerY);
       const strength = Math.min((rangePx - nearest) / fadePx, edge / fadePx, 1);
       const threshold = (BAYER_4[(y % 4) * 4 + (x % 4)] + 0.5) / 16;
       mask[y * width + x] = strength >= threshold ? 1 : 0;

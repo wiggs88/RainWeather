@@ -1,4 +1,4 @@
-import '@fontsource-variable/roboto-mono/index.css';
+import '@fontsource-variable/schibsted-grotesk/index.css';
 import 'ol/ol.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
