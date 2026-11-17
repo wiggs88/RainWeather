@@ -140,21 +140,36 @@ export function WeatherAlertCallout({ alerts, timezone }: WeatherAlertCalloutPro
           {alerts.map((alert, index) => {
             const { level, facts, hazards, notes } = summarizeAlertText(alert.description, alert.instruction);
             const timing = alertTiming(alert, timezone);
+            const levelMatch = level?.match(/(\d) of (\d)/);
             return (
               // Only the most severe warning starts expanded; the rest are one line each.
-              <details key={alert.id} className="alert-detail" open={index === 0}>
+              <details
+                key={alert.id}
+                className={`alert-detail severity-${alert.severity}`}
+                open={index === 0}
+              >
                 <summary>
                   <span className="alert-detail-title">
                     <strong className="alert-detail-name">{alertTitle(alert)}</strong>
                     {alert.severity === 'unknown' ? null : (
-                      <span className={`alert-severity severity-${alert.severity}`}>
-                        {capitalize(alert.severity)}
-                      </span>
+                      <span className="alert-severity">{capitalize(alert.severity)}</span>
                     )}
+                    <span className="alert-detail-chevron" aria-hidden="true" />
                   </span>
                   <span className="alert-detail-meta">
-                    {timing.charAt(0).toUpperCase() + timing.slice(1)}
-                    {level ? ` · ${level}` : ''}
+                    <span>{timing.charAt(0).toUpperCase() + timing.slice(1)}</span>
+                    {level ? (
+                      <span className="alert-level">
+                        {levelMatch ? (
+                          <span className="alert-level-meter" aria-hidden="true">
+                            {Array.from({ length: Number(levelMatch[2]) }, (_, step) => (
+                              <i key={step} className={step < Number(levelMatch[1]) ? 'is-on' : ''} />
+                            ))}
+                          </span>
+                        ) : null}
+                        {level}
+                      </span>
+                    ) : null}
                   </span>
                 </summary>
                 <div className="alert-detail-body">

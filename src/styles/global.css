@@ -1,6 +1,6 @@
 :root {
   color-scheme: dark;
-  font-family: 'Roboto Mono Variable', 'Roboto Mono', monospace;
+  font-family: 'Schibsted Grotesk Variable', 'Schibsted Grotesk', system-ui, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   --canvas: #090b0d;
@@ -500,16 +500,25 @@ a:focus-visible {
   font-size: 14px;
 }
 
+/* Warnings dialog: an official notice, so it reads apart from the rest of the
+   UI: warm-tinted paper, a pixel caution strip on top, and each warning
+   carrying its severity colour down its left edge. */
 .alert-dialog {
+  --alert-paper: #15130f;
+  --alert-card: #1c1a15;
+  --alert-line: #2f2b22;
   width: min(500px, calc(100vw - 24px));
-  max-height: min(80dvh, 640px);
+  max-height: min(84dvh, 680px);
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 0;
-  border: 1px solid var(--border);
+  border: 1px solid var(--alert-line);
   border-radius: 12px;
-  background: var(--surface);
+  background: var(--alert-paper);
   color: var(--text);
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.6);
+  scrollbar-color: var(--alert-line) transparent;
+  scrollbar-width: thin;
 }
 
 .alert-dialog:focus {
@@ -522,15 +531,46 @@ a:focus-visible {
 
 .alert-dialog-body {
   display: grid;
-  gap: 10px;
-  padding: 16px;
+  gap: 8px;
+  padding: 0 14px 16px;
 }
 
 .alert-dialog-header {
+  position: sticky;
+  z-index: 1;
+  top: 0;
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 4px;
+  margin: 0 -14px 4px;
+  padding: 20px 14px 14px;
+  background: var(--alert-paper);
+}
+
+/* Caution tape in hard pixel steps, matching the duck and the dithered radar. */
+.alert-dialog-header::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 6px;
+  background: repeating-linear-gradient(
+    -45deg,
+    #ffcc00 0 6px,
+    #15130f 6px 12px
+  );
+  content: '';
+  image-rendering: pixelated;
+}
+
+.alert-dialog-header::after {
+  position: absolute;
+  right: 14px;
+  bottom: 0;
+  left: 14px;
+  height: 1px;
+  background: var(--alert-line);
+  content: '';
 }
 
 .alert-dialog-duck {
@@ -547,15 +587,16 @@ a:focus-visible {
 
 .alert-dialog-heading h2 {
   margin: 0;
-  font-size: 16px;
-  font-weight: 650;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   line-height: 1.2;
 }
 
 .alert-dialog-heading p {
   margin: 3px 0 0;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .alert-dialog-close {
@@ -571,16 +612,40 @@ a:focus-visible {
   color: var(--text);
 }
 
+/* Severity colours are the radar palette's yellow, orange and red. */
 .alert-detail {
-  padding: 12px 14px;
-  border-radius: 10px;
-  background: var(--surface-raised);
+  --sev: var(--muted);
+  overflow: hidden;
+  border: 1px solid var(--alert-line);
+  border-left: 3px solid var(--sev);
+  border-radius: 8px;
+  background: var(--alert-card);
+}
+
+.alert-detail.severity-minor {
+  --sev: #ffee00;
+}
+
+.alert-detail.severity-moderate {
+  --sev: #ff9500;
+}
+
+.alert-detail.severity-severe,
+.alert-detail.severity-extreme {
+  --sev: #ff4d4d;
 }
 
 .alert-detail summary {
   display: grid;
+  gap: 6px;
+  padding: 12px 12px 12px 14px;
   cursor: pointer;
   list-style: none;
+  transition: background-color 160ms ease-out;
+}
+
+.alert-detail summary:hover {
+  background: rgb(255 255 255 / 0.025);
 }
 
 .alert-detail summary::-webkit-details-marker {
@@ -588,146 +653,180 @@ a:focus-visible {
 }
 
 .alert-detail summary:focus-visible {
-  border-radius: 4px;
   outline: 2px solid var(--focus);
-  outline-offset: 4px;
+  outline-offset: -2px;
 }
 
 .alert-detail-title {
   display: flex;
+  min-width: 0;
   align-items: center;
-  justify-content: space-between;
   gap: 10px;
 }
 
 .alert-detail-name {
+  min-width: 0;
+  flex: 1 1 auto;
   margin: 0;
-  font-size: 14px;
-  font-weight: 650;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
 }
 
 .alert-severity {
-  display: inline-flex;
   flex: 0 0 auto;
-  align-items: center;
-  gap: 6px;
-  color: var(--muted);
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--sev) 16%, transparent);
+  color: var(--sev);
   font-size: 10px;
-  letter-spacing: 0.04em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  text-transform: uppercase;
 }
 
-.alert-severity::after {
-  color: var(--faint);
-  font-size: 13px;
-  content: '▾';
+.alert-detail-chevron {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  margin: 0 2px 3px 0;
+  border-right: 1.5px solid var(--muted);
+  border-bottom: 1.5px solid var(--muted);
+  transform: rotate(45deg);
   transition: transform 180ms ease-out;
 }
 
-.alert-detail:not([open]) .alert-severity::after {
-  transform: rotate(-90deg);
-}
-
-.alert-severity::before {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--warning);
-  content: '';
-}
-
-/* Severity dots use the radar palette's yellow, orange and red. */
-.alert-severity.severity-minor::before {
-  background: #ffee00;
-}
-
-.alert-severity.severity-moderate::before {
-  background: #ff9500;
-}
-
-.alert-severity.severity-severe::before,
-.alert-severity.severity-extreme::before {
-  background: #e02424;
+.alert-detail:not([open]) .alert-detail-chevron {
+  margin-bottom: 0;
+  transform: rotate(-45deg);
 }
 
 .alert-detail-meta {
-  margin-top: 3px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
+}
+
+.alert-level {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.alert-level-meter {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.alert-level-meter i {
+  width: 6px;
+  height: 6px;
+  background: var(--alert-line);
+}
+
+.alert-level-meter i.is-on {
+  background: var(--sev);
 }
 
 .alert-detail-body {
   display: grid;
   gap: 14px;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
+  padding: 12px 12px 14px 14px;
+  border-top: 1px solid var(--alert-line);
 }
 
-/* Measured values as small tiles: label on top, value below. */
+/* Measured values as label/value rows: one per line, so long values wrap in
+   place and never leave holes in a grid. */
 .alert-facts {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 6px;
   margin: 0;
 }
 
 .alert-facts div {
   display: grid;
-  align-content: start;
-  gap: 3px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: var(--surface);
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: 12px;
+  align-items: baseline;
+  padding: 7px 0;
+  border-bottom: 1px dashed var(--alert-line);
+}
+
+.alert-facts div:first-child {
+  padding-top: 0;
+}
+
+.alert-facts div:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
 }
 
 .alert-facts dt {
   color: var(--muted);
-  font-size: 10px;
-  line-height: 1.3;
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .alert-facts dd {
   margin: 0;
   font-size: 13px;
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.alert-section {
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--sev) 7%, transparent);
 }
 
 .alert-section h3 {
-  margin: 0 0 6px;
-  color: var(--muted);
+  margin: 0 0 4px;
+  color: var(--sev);
   font-size: 10px;
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .alert-section p {
   margin: 0;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
 }
 
 .alert-note {
   margin: 0;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.5;
 }
 
 .alert-source {
   justify-self: start;
+  margin-top: 4px;
   padding: 4px 0;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   text-decoration: underline;
-  text-decoration-color: var(--border);
+  text-decoration-color: var(--alert-line);
   text-underline-offset: 3px;
 }
 
 .alert-source:hover,
 .alert-source:focus-visible {
-  color: var(--light-rain);
+  color: var(--text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alert-detail summary,
+  .alert-detail-chevron {
+    transition: none;
+  }
 }
 
 .rain-status {
